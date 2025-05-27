@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sso-go-gin/config"
+	"sso-go-gin/internal/features/login"
 	"sso-go-gin/internal/pkg/database"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,7 @@ func main() {
 		config.AppConfig.Port,
 		config.AppConfig.DBName)
 
-	database.Init(dsn)
+	db := database.Init(dsn)
 
 	router := gin.Default()
 	router.GET("/login", func(c *gin.Context) {
@@ -28,6 +29,12 @@ func main() {
 			"message": "received",
 		})
 	})
+
+	repo := login.NewRepository(db)
+	service := login.NewService(repo)
+	handler := login.NewHandler(service)
+
+	router.POST("/login", handler.PostLogin)
 
 	router.Run("localhost:8080")
 }

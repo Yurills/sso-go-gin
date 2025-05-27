@@ -1,16 +1,32 @@
 package login
 
+import (
+	"context"
+	"errors"
+	"sso-go-gin/internal/features/models"
+)
+
 type Service struct {
-	//access user repo
+	repository *repository
 	//create token maker
 }
 
-func (s *Service) Login(req LoginRequest) () {
-	//1. verify required parameter
-	//verify csrf_ses
-	//verify auth_request_code not expired
-	// verify username password
+func NewService(repo *repository) *Service {
+	return &Service{repo}
+}
 
-	//2. create code random string uniq
+func (s *Service) Login(c context.Context, req LoginRequest) (*models.User, error) {
+
+	//check if user matches
+	user, err := s.repository.GetUserInfo(c, req.Username)
+	if err != nil {
+		return nil, errors.New("invalid credentials")
+	}
+
+	if user.Password != req.Password {
+		return nil, errors.New("wrong Password")
+	}
+
+	return user, nil
 
 }
