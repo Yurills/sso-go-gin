@@ -1,14 +1,29 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"sso-go-gin/config"
+	"sso-go-gin/internal/pkg/database"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+
+	config.Load()
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s port=%s dbname=%s sslmode=disable",
+		config.AppConfig.Hostname,
+		config.AppConfig.Username,
+		config.AppConfig.Password,
+		config.AppConfig.Port,
+		config.AppConfig.DBName)
+
+	database.Init(dsn)
+
 	router := gin.Default()
-	router.GET("/authorize", func(c *gin.Context) {
+	router.GET("/login", func(c *gin.Context) {
 		c.IndentedJSON(http.StatusOK, gin.H{
 			"message": "received",
 		})
