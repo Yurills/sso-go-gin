@@ -1,7 +1,8 @@
 package database
 
 import (
-	"log"
+	"fmt"
+	"sso-go-gin/config"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -9,16 +10,21 @@ import (
 
 
 
+func NewDB() (*gorm.DB, error) {
+	config.Load()
 
-func Init(dsn string) *gorm.DB {
-	var err error
+	dsn := fmt.Sprintf("host=%s user=%s password=%s port=%s dbname=%s sslmode=disable",
+		config.AppConfig.Hostname,
+		config.AppConfig.Username,
+		config.AppConfig.Password,
+		config.AppConfig.Port,
+		config.AppConfig.DBName)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("failed to connect to database: " + err.Error())
+		return nil, err
 	}
-
+	return db, nil
 	
-	log.Println("Database connection established successfully")
-	return db
+
 }
