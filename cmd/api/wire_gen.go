@@ -8,6 +8,7 @@ package main
 
 import (
 	"sso-go-gin/internal/features/login"
+	"sso-go-gin/internal/features/register"
 	"sso-go-gin/internal/pkg/database"
 )
 
@@ -21,5 +22,16 @@ func InitializeLoginHandler() (*login.Handler, error) {
 	repository := login.NewRepository(db)
 	service := login.NewService(repository)
 	handler := login.NewHandler(service)
+	return handler, nil
+}
+
+func InitializeRegisterHandler() (*register.Handler, error) {
+	db, err := database.NewDB()
+	if err != nil {
+		return nil, err
+	}
+	repository := register.NewRepository(db)
+	service := register.NewService(repository)
+	handler := register.NewHandler(service)
 	return handler, nil
 }

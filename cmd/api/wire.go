@@ -5,6 +5,7 @@ package main
 
 import (
 	"sso-go-gin/internal/features/login"
+	"sso-go-gin/internal/features/register"
 	"sso-go-gin/internal/pkg/database"
 
 	"github.com/google/wire"
@@ -17,4 +18,13 @@ func InitializeLoginHandler() (*login.Handler, error) {
 		login.NewService,
 		login.NewHandler)
 	return &login.Handler{}, nil
+}
+
+func InitializeRegisterHandler() (*register.Handler, error) {
+	wire.Build(
+		database.NewDB,
+		register.NewRepository,
+		register.NewService,
+		register.NewHandler)
+	return &register.Handler{}, nil
 }

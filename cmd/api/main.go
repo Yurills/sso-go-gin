@@ -4,14 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"sso-go-gin/config"
-
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-
-	config.Load()
 
 	router := gin.Default()
 	router.GET("/login", func(c *gin.Context) {
@@ -20,12 +16,18 @@ func main() {
 		})
 	})
 
-	handler, err := InitializeLoginHandler()
+	loginHandler, err := InitializeLoginHandler()
 	if err != nil {
 		log.Fatalf("failed to initialize: %v", err)
 	}
 
-	router.POST("/login", handler.PostLogin)
+	registerHandler, err := InitializeRegisterHandler()
+	if err != nil {
+		log.Fatalf("failed to initialize: %v", err)
+	}
+
+	router.POST("/login", loginHandler.PostLogin)
+	router.POST("/register", registerHandler.PostRegister)
 
 	router.Run("localhost:8080")
 }
