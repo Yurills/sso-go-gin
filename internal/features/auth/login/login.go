@@ -3,7 +3,8 @@ package login
 import (
 	"context"
 	"errors"
-	"sso-go-gin/internal/features/models"
+	"sso-go-gin/internal/models"
+	"sso-go-gin/internal/pkg/utils"
 )
 
 type Service struct {
@@ -23,8 +24,8 @@ func (s *Service) Login(c context.Context, req LoginRequest) (*models.User, erro
 		return nil, errors.New("invalid credentials")
 	}
 
-	if user.Password != req.Password {
-		return nil, errors.New("wrong Password")
+	if utils.CheckPasswordHash(req.Password, user.Password) {
+		return nil, errors.New("wrong password")
 	}
 
 	return user, nil

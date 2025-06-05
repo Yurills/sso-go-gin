@@ -1,0 +1,48 @@
+package register
+
+import (
+	"context"
+	"errors"
+	"sso-go-gin/internal/models"
+	"sso-go-gin/internal/pkg/utils"
+)
+
+type Service struct {
+	repository *repository
+}
+
+func NewService(repo *repository) *Service {
+	return &Service{repo}
+}
+
+func (s *Service) Register(c context.Context, req RegisterRequest) (*models.User, error) {
+
+	//check if the username already exists
+	existingUser, err := s.repository.GetUserInfo(c, req.Username)
+	if err != nil {
+		return nil, err
+	}
+	if existingUser != nil {
+		return nil, errors.New("username already exists")
+	}
+
+	// Hash the password
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a new user model
+	user := &models.User{
+		Username: req.Username,
+		Password: hashedPassword,
+	}
+
+	// Save the user to the database
+	createdUser, err := s.repository.CreateUser(c, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdUser, nil
+}
