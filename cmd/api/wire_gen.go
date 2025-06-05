@@ -7,8 +7,8 @@
 package main
 
 import (
-	"sso-go-gin/internal/features/login"
-	"sso-go-gin/internal/features/register"
+	"sso-go-gin/internal/features/auth/login"
+	"sso-go-gin/internal/features/auth/register"
 	"sso-go-gin/internal/pkg/database"
 )
 
