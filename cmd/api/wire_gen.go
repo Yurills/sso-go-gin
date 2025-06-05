@@ -7,15 +7,17 @@
 package main
 
 import (
+	"sso-go-gin/config"
 	"sso-go-gin/internal/features/auth/login"
 	"sso-go-gin/internal/features/auth/register"
+	"sso-go-gin/internal/features/sso"
 	"sso-go-gin/internal/pkg/database"
 )
 
 // Injectors from wire.go:
 
-func InitializeLoginHandler() (*login.Handler, error) {
-	db, err := database.NewDB()
+func InitializeLoginHandler(cfg *config.Config) (*login.Handler, error) {
+	db, err := database.NewDB(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -25,13 +27,24 @@ func InitializeLoginHandler() (*login.Handler, error) {
 	return handler, nil
 }
 
-func InitializeRegisterHandler() (*register.Handler, error) {
-	db, err := database.NewDB()
+func InitializeRegisterHandler(cfg *config.Config) (*register.Handler, error) {
+	db, err := database.NewDB(cfg)
 	if err != nil {
 		return nil, err
 	}
 	repository := register.NewRepository(db)
 	service := register.NewService(repository)
 	handler := register.NewHandler(service)
+	return handler, nil
+}
+
+func initializeSSOHandler(cfg *config.Config) (*sso.Handler, error) {
+	db, err := database.NewDB(cfg)
+	if err != nil {
+		return nil, err
+	}
+	repository := sso.NewRepository(db)
+	service := sso.NewService(repository)
+	handler := sso.NewHandler(service)
 	return handler, nil
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"sso-go-gin/internal/models"
 	"sso-go-gin/internal/pkg/utils"
+	"gorm.io/gorm"
 )
 
 type Service struct {
@@ -19,7 +20,7 @@ func (s *Service) Register(c context.Context, req RegisterRequest) (*models.User
 
 	//check if the username already exists
 	existingUser, err := s.repository.GetUserInfo(c, req.Username)
-	if err != nil {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 	if existingUser != nil {

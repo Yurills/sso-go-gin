@@ -1,21 +1,22 @@
 package config
+
 import (
-	"github.com/joho/godotenv"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Hostname    string
-	Username    string
-	Password    string
-	Port        string
-	DBName      string
-	
+	Hostname string
+	Username string
+	Password string
+	Port     string
+	DBName   string
 }
 
 var AppConfig *Config
 
-func Load() {
+func Load() *Config {
 	_ = godotenv.Load()
 
 	AppConfig = &Config{
@@ -24,8 +25,9 @@ func Load() {
 		Password: getEnv("DB_PASSWORD", "12345"),
 		Port:     getEnv("DB_PORT", "5432"),
 		DBName:   getEnv("DB_NAME", "mydatabase"),
-
 	}
+
+	return AppConfig
 }
 
 func getEnv(key string, defaultValue string) string {
