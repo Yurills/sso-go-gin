@@ -1,9 +1,13 @@
 package models
 
+import (
+	"github.com/google/uuid"
+)
+
 type User struct {
-	ID       uint   `json:"id" gorm:"primaryKey"`
-	Username string `json:"username" gorm:"uniqueIndex;not null"`
-	Password string `json:"password" gorm:"not null"`
+	ID       uuid.UUID `json:"id" gorm:"primaryKey;default:gen_random_uuid()"`
+	Username string    `json:"username" gorm:"uniqueIndex;not null"`
+	Password string    `json:"password" gorm:"not null"`
 }
 
 func (User) TableName() string {

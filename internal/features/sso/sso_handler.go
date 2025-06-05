@@ -16,34 +16,21 @@ func NewHandler(Service *Service) *Handler {
 
 func (h *Handler) PostLogin(c *gin.Context) {
 	var req LoginRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid form submission"})
+
+	//verify JSON binding
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
 		return
 	}
 
-	//need check csrf token
-
-	//check auth request by RID
-	authReq, err := h.Service.repository.GetAuthRequestByID(c.Request.Context(), req.RID)
-	if err != nil || authReq.IsExpired() {
-		c.JSON(400, gin.H{"error": err})
-		return
-	}
-
-	//check username password
-	user, err := h.Service.Login(c.Request.Context(), req.Username, req.Password)
+	//call service to handle login
+	res, err := h.Service.Login(c, req)
 	if err != nil {
-		c.JSON(400, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	//generate token
-	_, redirectURI, err := h.Service.IssueAuthCode(c.Request.Context(), user.ID, req.RID)
-	if err != nil {
-		c.JSON(400, gin.H{"error": err})
-		return
-	}
-
-	c.JSON(200, gin.H{"redirectedURI": redirectURI})
+	callback_uri := res.RedirectURI + "?code=" + res.AuthCode + "&state=" + res.State
+	c.JSON(http.StatusOK, gin.H{
+		"redirect_url": callback_uri})
 
 }

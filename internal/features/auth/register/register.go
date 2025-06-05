@@ -5,6 +5,8 @@ import (
 	"errors"
 	"sso-go-gin/internal/models"
 	"sso-go-gin/internal/pkg/utils"
+
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -35,6 +37,7 @@ func (s *Service) Register(c context.Context, req RegisterRequest) (*models.User
 
 	// Create a new user model
 	user := &models.User{
+		ID:       uuid.New(), // Assuming GenerateUUID generates a new UUID
 		Username: req.Username,
 		Password: hashedPassword,
 	}
