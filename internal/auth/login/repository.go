@@ -2,7 +2,7 @@ package login
 
 import (
 	"context"
-	"sso-go-gin/internal/models"
+	"sso-go-gin/internal/auth/models"
 
 	"gorm.io/gorm"
 )

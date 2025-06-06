@@ -3,8 +3,8 @@ package register
 import (
 	"context"
 	"errors"
-	"sso-go-gin/internal/models"
-	"sso-go-gin/internal/pkg/utils"
+	"sso-go-gin/internal/auth/models"
+	"sso-go-gin/pkg/utils/hashutil"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -30,7 +30,7 @@ func (s *Service) Register(c context.Context, req RegisterRequest) (*models.User
 	}
 
 	// Hash the password
-	hashedPassword, err := utils.HashPassword(req.Password)
+	hashedPassword, err := hashutil.HashPassword(req.Password)
 	if err != nil {
 		return nil, err
 	}

@@ -1,21 +1,23 @@
-package sso
+package handler
 
 import (
 	"net/http"
+	"sso-go-gin/internal/sso/dtos"
+	"sso-go-gin/internal/sso/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Handler struct {
-	Service *Service
+type LoginHandler struct {
+	LoginService *service.LoginService
 }
 
-func NewHandler(Service *Service) *Handler {
-	return &Handler{Service}
+func NewLoginHandler(LoginService *service.LoginService) *LoginHandler {
+	return &LoginHandler{LoginService}
 }
 
-func (h *Handler) PostLogin(c *gin.Context) {
-	var req LoginRequest
+func (h *LoginHandler) PostLogin(c *gin.Context) {
+	var req dtos.LoginRequest
 
 	//verify JSON binding
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -24,7 +26,7 @@ func (h *Handler) PostLogin(c *gin.Context) {
 	}
 
 	//call service to handle login
-	res, err := h.Service.Login(c, req)
+	res, err := h.LoginService.Login(c, req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -34,3 +36,5 @@ func (h *Handler) PostLogin(c *gin.Context) {
 		"redirect_url": callback_uri})
 
 }
+
+
