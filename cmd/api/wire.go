@@ -5,38 +5,28 @@ package main
 
 import (
 	"sso-go-gin/config"
-	"sso-go-gin/internal/features/auth/login"
-	"sso-go-gin/internal/features/auth/register"
-	"sso-go-gin/internal/features/sso"
-	"sso-go-gin/internal/pkg/database"
+	"sso-go-gin/internal/sso"
+	"sso-go-gin/internal/sso/handler"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
-func InitializeLoginHandler(cfg *config.Config) (*login.Handler, error) {
+func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
 	wire.Build(
-		database.NewDB,
-		login.NewRepository,
-		login.NewService,
-		login.NewHandler)
-	return &login.Handler{}, nil
+		sso.InitializeSSOHandlers,
+		newRouter,
+	)
+	return nil, nil
 }
 
-func InitializeRegisterHandler(cfg *config.Config) (*register.Handler, error) {
-	wire.Build(
-		database.NewDB,
-		register.NewRepository,
-		register.NewService,
-		register.NewHandler)
-	return &register.Handler{}, nil
+func newRouter(h *handler.SSOHandlers) *gin.Engine {
+	r := gin.Default()
+
+	ssoGroup := r.Group("/sso")
+	handler.RegisterSSORoutes(ssoGroup, h)
+
+	return r
 }
 
-func initializeSSOHandler(cfg *config.Config) (*sso.Handler, error) {
-	wire.Build(
-		database.NewDB,
-		sso.NewRepository,
-		sso.NewService,
-		sso.NewHandler)
-	return &sso.Handler{}, nil
 
-}

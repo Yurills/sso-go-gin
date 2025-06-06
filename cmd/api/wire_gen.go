@@ -7,44 +7,30 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"sso-go-gin/config"
-	"sso-go-gin/internal/features/auth/login"
-	"sso-go-gin/internal/features/auth/register"
-	"sso-go-gin/internal/features/sso"
-	"sso-go-gin/internal/pkg/database"
+	"sso-go-gin/internal/sso"
+	"sso-go-gin/internal/sso/handler"
 )
 
 // Injectors from wire.go:
 
-func InitializeLoginHandler(cfg *config.Config) (*login.Handler, error) {
-	db, err := database.NewDB(cfg)
+func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
+	ssoHandlers, err := sso.InitializeSSOHandlers(cfg)
 	if err != nil {
 		return nil, err
 	}
-	repository := login.NewRepository(db)
-	service := login.NewService(repository)
-	handler := login.NewHandler(service)
-	return handler, nil
+	engine := newRouter(ssoHandlers)
+	return engine, nil
 }
 
-func InitializeRegisterHandler(cfg *config.Config) (*register.Handler, error) {
-	db, err := database.NewDB(cfg)
-	if err != nil {
-		return nil, err
-	}
-	repository := register.NewRepository(db)
-	service := register.NewService(repository)
-	handler := register.NewHandler(service)
-	return handler, nil
-}
+// wire.go:
 
-func initializeSSOHandler(cfg *config.Config) (*sso.Handler, error) {
-	db, err := database.NewDB(cfg)
-	if err != nil {
-		return nil, err
-	}
-	repository := sso.NewRepository(db)
-	service := sso.NewService(repository)
-	handler := sso.NewHandler(service)
-	return handler, nil
+func newRouter(h *handler.SSOHandlers) *gin.Engine {
+	r := gin.Default()
+
+	ssoGroup := r.Group("/sso")
+	handler.RegisterSSORoutes(ssoGroup, h)
+
+	return r
 }
