@@ -28,5 +28,3 @@ func newRouter(h *handler.SSOHandlers) *gin.Engine {
 
 	return r
 }
-
-

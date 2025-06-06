@@ -46,7 +46,7 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 		ExpiredDatetime: time.Now().Add(5 * time.Minute),
 		CreatedDatetime: time.Now(),
 	}
-	if err := s.repository.SaveAuthCode(ctx, *authCodeRecord); err != nil {
+	if err := s.repository.SaveAuthCode(ctx, authCodeRecord); err != nil {
 		return nil, errors.New("failed to save auth code")
 	}
 

@@ -24,8 +24,12 @@ func InitializeSSOHandlers(cfg *config.Config) (*handler.SSOHandlers, error) {
 	loginRepository := repository.NewLoginRepository(db)
 	loginService := service.NewLoginService(loginRepository)
 	loginHandler := handler.NewLoginHandler(loginService)
+	authorizeRepository := repository.NewAuthorizeRepository(db)
+	authorizeService := service.NewAuthorizeService(authorizeRepository)
+	authorizeHandler := handler.NewAuthorizeHandler(authorizeService)
 	ssoHandlers := &handler.SSOHandlers{
-		Login: loginHandler,
+		Login:     loginHandler,
+		Authorize: authorizeHandler,
 	}
 	return ssoHandlers, nil
 }

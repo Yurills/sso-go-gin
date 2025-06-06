@@ -20,6 +20,10 @@ func InitializeSSOHandlers(cfg *config.Config) (*handler.SSOHandlers, error) {
 		service.NewLoginService,
 		handler.NewLoginHandler,
 
+		repository.NewAuthorizeRepository,
+		service.NewAuthorizeService,
+		handler.NewAuthorizeHandler,
+
 		wire.Struct(new(handler.SSOHandlers), "*"),
 	)
 	return nil, nil

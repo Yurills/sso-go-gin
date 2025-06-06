@@ -30,6 +30,6 @@ func (r *LoginRepository) GetAuthRequestByID(c context.Context, id string) (*mod
 	return &req, nil
 }
 
-func (r *LoginRepository) SaveAuthCode(c context.Context, code models.AuthCode) error {
+func (r *LoginRepository) SaveAuthCode(c context.Context, code *models.AuthCode) error {
 	return r.db.WithContext(c).Create(code).Error
 }
