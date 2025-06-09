@@ -5,26 +5,27 @@ package sso
 
 import (
 	"sso-go-gin/config"
-	"sso-go-gin/internal/sso/handler"
-	"sso-go-gin/internal/sso/repository"
-	"sso-go-gin/internal/sso/service"
-	"sso-go-gin/pkg/database"
+	authorizeHandler "sso-go-gin/internal/sso/authorize/handler"
+	loginHandler "sso-go-gin/internal/sso/login/handler"
+
+	"sso-go-gin/internal/sso/authorize"
+	"sso-go-gin/internal/sso/login"
 
 	"github.com/google/wire"
+	"gorm.io/gorm"
 )
 
-func InitializeSSOHandlers(cfg *config.Config) (*handler.SSOHandlers, error) {
+type SSOHandlers struct {
+	LoginHandler     *loginHandler.LoginHandler
+	AuthorizeHandler *authorizeHandler.AuthorizeHandler
+}
+
+func InitializeSSOHandlers(cfg *config.Config, db *gorm.DB) (*SSOHandlers, error) {
 	wire.Build(
-		database.NewDB,
-		repository.NewLoginRepository,
-		service.NewLoginService,
-		handler.NewLoginHandler,
-
-		repository.NewAuthorizeRepository,
-		service.NewAuthorizeService,
-		handler.NewAuthorizeHandler,
-
-		wire.Struct(new(handler.SSOHandlers), "*"),
+		login.ProviderSet,
+		authorize.Providers,
+		wire.Struct(new(SSOHandlers), "*"),
 	)
 	return nil, nil
+
 }

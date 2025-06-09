@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"sso-go-gin/pkg/utils/randomutil"
-	"sso-go-gin/internal/sso/dtos"
+	"sso-go-gin/internal/sso/login/dtos"
 	"sso-go-gin/internal/sso/models"
-	"sso-go-gin/internal/sso/repository"
+	"sso-go-gin/internal/sso/login/repository"
 )
 
 type LoginService struct {

@@ -7,29 +7,35 @@
 package sso
 
 import (
+	"gorm.io/gorm"
 	"sso-go-gin/config"
-	"sso-go-gin/internal/sso/handler"
-	"sso-go-gin/internal/sso/repository"
-	"sso-go-gin/internal/sso/service"
-	"sso-go-gin/pkg/database"
+	handler2 "sso-go-gin/internal/sso/authorize/handler"
+	repository2 "sso-go-gin/internal/sso/authorize/repository"
+	service2 "sso-go-gin/internal/sso/authorize/service"
+	"sso-go-gin/internal/sso/login/handler"
+	"sso-go-gin/internal/sso/login/repository"
+	"sso-go-gin/internal/sso/login/service"
 )
 
 // Injectors from wire.go:
 
-func InitializeSSOHandlers(cfg *config.Config) (*handler.SSOHandlers, error) {
-	db, err := database.NewDB(cfg)
-	if err != nil {
-		return nil, err
-	}
+func InitializeSSOHandlers(cfg *config.Config, db *gorm.DB) (*SSOHandlers, error) {
 	loginRepository := repository.NewLoginRepository(db)
 	loginService := service.NewLoginService(loginRepository)
 	loginHandler := handler.NewLoginHandler(loginService)
-	authorizeRepository := repository.NewAuthorizeRepository(db)
-	authorizeService := service.NewAuthorizeService(authorizeRepository)
-	authorizeHandler := handler.NewAuthorizeHandler(authorizeService)
-	ssoHandlers := &handler.SSOHandlers{
-		Login:     loginHandler,
-		Authorize: authorizeHandler,
+	authorizeRepository := repository2.NewAuthorizeRepository(db)
+	authorizeService := service2.NewAuthorizeService(authorizeRepository)
+	authorizeHandler := handler2.NewAuthorizeHandler(authorizeService)
+	ssoHandlers := &SSOHandlers{
+		LoginHandler:     loginHandler,
+		AuthorizeHandler: authorizeHandler,
 	}
 	return ssoHandlers, nil
+}
+
+// wire.go:
+
+type SSOHandlers struct {
+	LoginHandler     *handler.LoginHandler
+	AuthorizeHandler *handler2.AuthorizeHandler
 }

@@ -2,8 +2,8 @@ package handler
 
 import (
 	"net/http"
-	"sso-go-gin/internal/sso/dtos"
-	"sso-go-gin/internal/sso/service"
+	"sso-go-gin/internal/sso/authorize/dtos"
+	"sso-go-gin/internal/sso/authorize/service"
 
 	"github.com/gin-gonic/gin"
 )

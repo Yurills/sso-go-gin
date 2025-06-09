@@ -10,13 +10,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"sso-go-gin/config"
 	"sso-go-gin/internal/sso"
-	"sso-go-gin/internal/sso/handler"
+	handler2 "sso-go-gin/internal/sso/authorize/handler"
+	"sso-go-gin/internal/sso/login/handler"
+	"sso-go-gin/pkg/database"
 )
 
 // Injectors from wire.go:
 
 func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
-	ssoHandlers, err := sso.InitializeSSOHandlers(cfg)
+	db, err := database.NewDB(cfg)
+	if err != nil {
+		return nil, err
+	}
+	ssoHandlers, err := sso.InitializeSSOHandlers(cfg, db)
 	if err != nil {
 		return nil, err
 	}
@@ -26,11 +32,12 @@ func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
 
 // wire.go:
 
-func newRouter(h *handler.SSOHandlers) *gin.Engine {
+func newRouter(h *sso.SSOHandlers) *gin.Engine {
 	r := gin.Default()
 
 	ssoGroup := r.Group("/sso")
-	handler.RegisterSSORoutes(ssoGroup, h)
+	handler.RegisterRoutes(ssoGroup, h.LoginHandler)
+	handler2.RegisterRoutes(ssoGroup, h.AuthorizeHandler)
 
 	return r
 }

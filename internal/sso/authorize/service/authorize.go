@@ -2,9 +2,9 @@ package service
 
 import (
 	"errors"
-	"sso-go-gin/internal/sso/dtos"
+	"sso-go-gin/internal/sso/authorize/dtos"
 	"sso-go-gin/internal/sso/models"
-	"sso-go-gin/internal/sso/repository"
+	"sso-go-gin/internal/sso/authorize/repository"
 	"time"
 
 	"github.com/gin-gonic/gin"
