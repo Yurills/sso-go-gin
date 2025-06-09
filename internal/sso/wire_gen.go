@@ -15,6 +15,7 @@ import (
 	"sso-go-gin/internal/sso/login/handler"
 	"sso-go-gin/internal/sso/login/repository"
 	"sso-go-gin/internal/sso/login/service"
+	"sso-go-gin/internal/sso/token"
 )
 
 // Injectors from wire.go:
@@ -26,9 +27,13 @@ func InitializeSSOHandlers(cfg *config.Config, db *gorm.DB) (*SSOHandlers, error
 	authorizeRepository := repository2.NewAuthorizeRepository(db)
 	authorizeService := service2.NewAuthorizeService(authorizeRepository)
 	authorizeHandler := handler2.NewAuthorizeHandler(authorizeService)
+	tokenRepository := token.NewTokenRepository(db)
+	tokenService := token.NewTokenService(tokenRepository)
+	tokenHandler := token.NewTokenHandler(tokenService)
 	ssoHandlers := &SSOHandlers{
 		LoginHandler:     loginHandler,
 		AuthorizeHandler: authorizeHandler,
+		TokenHandler:     tokenHandler,
 	}
 	return ssoHandlers, nil
 }
@@ -38,4 +43,5 @@ func InitializeSSOHandlers(cfg *config.Config, db *gorm.DB) (*SSOHandlers, error
 type SSOHandlers struct {
 	LoginHandler     *handler.LoginHandler
 	AuthorizeHandler *handler2.AuthorizeHandler
+	TokenHandler     *token.TokenHandler
 }

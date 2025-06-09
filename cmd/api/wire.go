@@ -8,6 +8,7 @@ import (
 	"sso-go-gin/internal/sso"
 	authorizeHandler "sso-go-gin/internal/sso/authorize/handler"
 	loginHandler "sso-go-gin/internal/sso/login/handler"
+	tokenHandler "sso-go-gin/internal/sso/token"
 
 	"sso-go-gin/pkg/database"
 
@@ -30,6 +31,7 @@ func newRouter(h *sso.SSOHandlers) *gin.Engine {
 	ssoGroup := r.Group("/sso")
 	loginHandler.RegisterRoutes(ssoGroup, h.LoginHandler)
 	authorizeHandler.RegisterRoutes(ssoGroup, h.AuthorizeHandler)
+	tokenHandler.RegisterRoutes(ssoGroup, h.TokenHandler)
 
 	return r
 }
