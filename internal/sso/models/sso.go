@@ -67,3 +67,14 @@ type AuthClient struct {
 	CreatedDatetime         time.Time       `gorm:"not null;default:now()" json:"created_datetime"`
 	UpdatedDatetime         time.Time       `gorm:"not null" json:"updated_datetime"`
 }
+
+type SSOToken struct {
+	ID              uuid.UUID `json:"id" gorm:"type:uuid;primaryKey;"`
+	Token           string    `json:"token" gorm:"type:varchar(100);uniqueIndex;not null"`
+	Source          string    `json:"source" gorm:"type:varchar(50);not null"`
+	Destination     string    `json:"destination" gorm:"type:varchar(50);not null"`
+	ClientID        uuid.UUID `json:"client_id" gorm:"type:uuid;not null"`
+	User            string    `json:"user" gorm:"type:varchar(50);not null"`
+	ExpiredDatetime time.Time `json:"expired_datetime" gorm:"not null"`
+	CreatedDatetime time.Time `json:"created_datetime" gorm:"not null;default:now()"`
+}

@@ -2,14 +2,16 @@ package service
 
 import (
 	"errors"
+	"net/http"
 	"time"
+
+	"sso-go-gin/internal/sso/login/dtos"
+	"sso-go-gin/internal/sso/login/repository"
+	"sso-go-gin/internal/sso/models"
+	"sso-go-gin/pkg/utils/randomutil"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"sso-go-gin/pkg/utils/randomutil"
-	"sso-go-gin/internal/sso/login/dtos"
-	"sso-go-gin/internal/sso/models"
-	"sso-go-gin/internal/sso/login/repository"
 )
 
 type LoginService struct {
@@ -33,11 +35,13 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 	}
 
 	//check if credentials are valid
-	
 
-	
 	//generate auth code and insert into database
-	authCode := randomutil.GenerateRandomString(32) // Generate a random auth code
+	authCode, err := randomutil.GenerateRandomString(32) // Generate a random auth code
+	if err != nil {
+		return nil, errors.New("failed to generate auth code")
+	}
+
 	authCodeRecord := &models.AuthCode{
 		ID:              uuid.New(),
 		Code:            authCode,
@@ -50,13 +54,23 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 		return nil, errors.New("failed to save auth code")
 	}
 
+	//create cookie on browser
+	session_id := uuid.New().String()
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     "sso_session",
+		Value:    session_id,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Now().Add(24 * time.Hour), // Set cookie expiration
+	})
+
 	loginResponse := &dtos.LoginResponse{
 		AuthCode:    authCodeRecord.Code,
 		RedirectURI: authReq.AuthRedirectCallbackURI,
 		State:       authReq.State,
 	}
-
-	//create cookie
 	return loginResponse, nil
 
 }

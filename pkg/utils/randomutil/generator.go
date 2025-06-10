@@ -1,12 +1,15 @@
 package randomutil
 
-import "strconv"
+import (
+	"crypto/rand"
+	"encoding/base64"
+)
 
-func GenerateRandomString(length int) string {
-	//temporary
-	rstring := ""
-	for i := range length {
-		rstring += strconv.Itoa(i % 10) // Generate a string of digits
+func GenerateRandomString(length int) (string, error) {
+	bytes := make([]byte, length)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return "", err
 	}
-	return rstring
+	return base64.RawURLEncoding.EncodeToString(bytes)[:length], nil
 }

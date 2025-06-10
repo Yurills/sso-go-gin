@@ -48,12 +48,21 @@ func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*Token
 		return nil, errors.New(req.CodeVerifier + " does not match the code challenge:" + hashedCodeVerifier + " != " + auth_request.CodeChallenge)
 	}
 
+	accesstoken, err := randomutil.GenerateRandomString(32)
+	if err != nil {
+		return nil, errors.New("failed to generate access token")
+	}
+	refreshtoken, err := randomutil.GenerateRandomString(32)
+	if err != nil {
+		return nil, errors.New("failed to generate refresh token")
+	}
+
 	//generate access token
 	response := &TokenResponse{
-		AccessToken:  randomutil.GenerateRandomString(32), // Generate a random access token
+		AccessToken:  accesstoken, // Generate a random access token
 		TokenType:    "Bearer",
-		ExpiresIn:    3600,                                // Set token expiration time (1 hour)
-		RefreshToken: randomutil.GenerateRandomString(32), // Generate a random refresh token
+		ExpiresIn:    3600,         // Set token expiration time (1 hour)
+		RefreshToken: refreshtoken, // Generate a random refresh token
 		Nonce:        req.Nonce,
 	}
 	return response, nil
