@@ -33,3 +33,13 @@ func (r *LoginRepository) GetAuthRequestByID(c context.Context, id string) (*mod
 func (r *LoginRepository) SaveAuthCode(c context.Context, code *models.AuthCode) error {
 	return r.db.WithContext(c).Create(code).Error
 }
+
+func (r *LoginRepository) GetUserInfo(c context.Context, username string) (*models.User, error) {
+	var user models.User
+	if err := r.db.WithContext(c).
+		Where("username = ?", username).
+		First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}

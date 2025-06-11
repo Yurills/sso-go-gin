@@ -35,6 +35,13 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 	}
 
 	//check if credentials are valid
+	user, err := s.repository.GetUserInfo(ctx, req.Username)
+	if err != nil || user == nil {
+		return nil, errors.New("invalid username or password")
+	}
+	if !user.CheckPassword(req.Password) {
+		return nil, errors.New("wrong password")
+	}
 
 	//generate auth code and insert into database
 	authCode, err := randomutil.GenerateRandomString(32) // Generate a random auth code

@@ -3,8 +3,9 @@ package service
 import (
 	"errors"
 	"sso-go-gin/internal/sso/authorize/dtos"
-	"sso-go-gin/internal/sso/models"
 	"sso-go-gin/internal/sso/authorize/repository"
+	"sso-go-gin/internal/sso/models"
+	"sso-go-gin/pkg/utils/randomutil"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -34,19 +35,28 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 		return nil, errors.New("client not active")
 	}
 
+	//generate csrf_token
+	csrfToken, err := randomutil.GenerateRandomString(64)
+	if err != nil {
+		return nil, errors.New("failed to generate CSRF token")
+	}
+
 	authRequestCode := &models.AuthRequestCode{
 		ID:                      uuid.New(),
 		ClientID:                authClient.ID,
 		ResponseType:            req.ResponseType,
-		Scope:                   req.Scope,
 		State:                   req.State,
 		Nonce:                   req.Nonce,
 		CodeChallenge:           req.CodeChallenge,
 		CodeChallengeMethod:     req.CodeChallengeMethod,
-		AuthRedirectCallbackURI: req.RedirectURI,
-		SSORedirectCallbackURI:  req.RedirectURI,
-		ExpiredDatetime:         time.Now().Add(10 * time.Minute),
+		AuthRedirectCallbackURI: authClient.AuthRedirectCallbackURI,
+		SSORedirectCallbackURI:  authClient.SSORedirectCallbackURI,
+		ExpiredDatetime:         time.Now().Add(5 * time.Minute),
 		CreatedDatetime:         time.Now(),
+	}
+
+	if err := s.repository.SaveCSRFToken(ctx, csrfToken, authRequestCode.ID.String(), 5*time.Minute); err != nil {
+		return nil, errors.New(err.Error())
 	}
 
 	if err := s.repository.SaveRequestCode(ctx, authRequestCode); err != nil {
@@ -54,7 +64,8 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 	}
 
 	authorizeResponse := &dtos.AuthroizeResponse{
-		RID: authClient.ID.String(),
+		RID:     authClient.ID.String(),
+		CRSFSes: csrfToken,
 	}
 
 	return authorizeResponse, nil

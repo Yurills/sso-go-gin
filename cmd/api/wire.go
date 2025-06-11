@@ -8,8 +8,8 @@ import (
 	"sso-go-gin/internal/sso"
 	authorizeHandler "sso-go-gin/internal/sso/authorize/handler"
 	loginHandler "sso-go-gin/internal/sso/login/handler"
-	tokenHandler "sso-go-gin/internal/sso/token"
 	parHandler "sso-go-gin/internal/sso/par/handler"
+	tokenHandler "sso-go-gin/internal/sso/token"
 
 	"sso-go-gin/pkg/database"
 
@@ -20,6 +20,7 @@ import (
 func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
 	wire.Build(
 		database.NewDB,
+		database.NewRedisClient,
 		sso.InitializeSSOHandlers,
 		newRouter,
 	)

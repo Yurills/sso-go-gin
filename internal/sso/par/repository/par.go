@@ -31,6 +31,22 @@ func (r *PARRepository) GetAuthClientByID(c context.Context, clientID string) (*
 	return &authClient, nil
 }
 
+func (r *PARRepository) GetSSOTokenByClientID(c context.Context, clientID string) (*models.SSOToken, error) {
+	var ssoToken models.SSOToken
+	if err := r.db.WithContext(c).Where("client_id = ?", clientID).First(&ssoToken).Error; err != nil {
+		return nil, err
+	}
+	return &ssoToken, nil
+}
+
 func (r *PARRepository) SaveSSOToken(c context.Context, token *models.SSOToken) error {
 	return r.db.WithContext(c).Create(token).Error
+}
+
+func (r *PARRepository) SaveAuthRequest(c context.Context, req *models.AuthRequestCode) error {
+	return r.db.WithContext(c).Create(req).Error
+}
+
+func (r *PARRepository) SaveSSORequestURI(c context.Context, uri *models.SSORequestURI) error {
+	return r.db.WithContext(c).Create(uri).Error
 }

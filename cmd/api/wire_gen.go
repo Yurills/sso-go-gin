@@ -24,7 +24,8 @@ func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-	ssoHandlers, err := sso.InitializeSSOHandlers(cfg, db)
+	client := database.NewRedisClient(cfg)
+	ssoHandlers, err := sso.InitializeSSOHandlers(cfg, db, client)
 	if err != nil {
 		return nil, err
 	}

@@ -7,6 +7,7 @@
 package sso
 
 import (
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"sso-go-gin/config"
 	handler2 "sso-go-gin/internal/sso/authorize/handler"
@@ -23,11 +24,11 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeSSOHandlers(cfg *config.Config, db *gorm.DB) (*SSOHandlers, error) {
+func InitializeSSOHandlers(cfg *config.Config, db *gorm.DB, redis2 *redis.Client) (*SSOHandlers, error) {
 	loginRepository := repository.NewLoginRepository(db)
 	loginService := service.NewLoginService(loginRepository)
 	loginHandler := handler.NewLoginHandler(loginService)
-	authorizeRepository := repository2.NewAuthorizeRepository(db)
+	authorizeRepository := repository2.NewAuthorizeRepository(db, redis2)
 	authorizeService := service2.NewAuthorizeService(authorizeRepository)
 	authorizeHandler := handler2.NewAuthorizeHandler(authorizeService)
 	tokenRepository := token.NewTokenRepository(db)

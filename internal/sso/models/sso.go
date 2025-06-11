@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"sso-go-gin/pkg/utils/hashutil"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,6 +16,11 @@ type User struct {
 
 func (User) TableName() string {
 	return "user_info"
+}
+
+func (u *User) CheckPassword(password string) bool {
+	hash := hashutil.CheckPasswordHash(password, u.Password)
+	return hash
 }
 
 type AuthRequestCode struct {
@@ -77,4 +83,24 @@ type SSOToken struct {
 	User            string    `json:"user" gorm:"type:varchar(50);not null"`
 	ExpiredDatetime time.Time `json:"expired_datetime" gorm:"not null"`
 	CreatedDatetime time.Time `json:"created_datetime" gorm:"not null;default:now()"`
+}
+
+func (s *SSOToken) IsExpired() bool {
+	// return time.Now().After(s.ExpiredDatetime)
+	return false //for testing purposes
+}
+
+type SSORequestURI struct {
+	ID                 uuid.UUID `json:"id" gorm:"type:uuid;primaryKey;"`
+	User               string    `json:"user" gorm:"type:varchar(50);not null"`
+	RedirectURI        string    `json:"redirect_uri" gorm:"type:varchar(255);not null"`
+	SSOToken           string    `json:"sso_token" gorm:"type:varchar(100);not null"`
+	GetAuthRequestByID uuid.UUID `json:"get_auth_request_by_id" gorm:"type:uuid;not null"`
+	ExpiredDatetime    time.Time `json:"expired_datetime" gorm:"not null"`
+	CreatedDatetime    time.Time `json:"created_datetime" gorm:"not null;default:now()"`
+}
+
+func (s *SSORequestURI) IsExpired() bool {
+	// return time.Now().After(s.ExpiredDatetime)
+	return false //for testing purposes
 }

@@ -4,21 +4,12 @@ import (
 	"errors"
 	"sso-go-gin/internal/sso/models"
 	"sso-go-gin/internal/sso/par/dtos"
-	"sso-go-gin/internal/sso/par/repository"
 	"sso-go-gin/pkg/utils/randomutil"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
-
-type PARService struct {
-	repository *repository.PARRepository
-}
-
-func NewPARService(repository *repository.PARRepository) *PARService {
-	return &PARService{repository: repository}
-}
 
 func (s *PARService) GetRequestToken(c *gin.Context, req *dtos.PARRequestTokenRequest) (*dtos.PARRequestTokenResponse, error) {
 	authRequest, err := s.repository.GetAuthRequestByClientID(c, req.ClientID)
@@ -32,6 +23,14 @@ func (s *PARService) GetRequestToken(c *gin.Context, req *dtos.PARRequestTokenRe
 
 	if authRequest.IsExpired() {
 		return nil, errors.New("authorization request is expired for client ID: " + req.ClientID)
+	}
+
+	authClient, err := s.repository.GetAuthClientByID(c, req.ClientID)
+	if err != nil {
+		return nil, errors.New("failed to get auth client: " + err.Error())
+	}
+	if !authClient.Active {
+		return nil, errors.New("auth client is not active for client ID: " + req.ClientID)
 	}
 
 	token, err := randomutil.GenerateRandomString(32)
