@@ -28,6 +28,7 @@ func (r *AuthorizeRepository) GetAuthClientByID(c context.Context, client_id str
 }
 
 func (r *AuthorizeRepository) SaveRequestCode(c context.Context, code *models.AuthRequestCode) error {
+
 	return r.db.WithContext(c).Create(code).Error
 }
 

@@ -2,7 +2,7 @@ package hashutil
 
 import (
 	"crypto/sha256"
-	"fmt"
+	"encoding/base64"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,6 +19,7 @@ func CheckPasswordHash(password, hash string) bool {
 }
 func HashedCodeVerifier(codeVerifier string) string {
 	hashed := sha256.Sum256([]byte(codeVerifier))
-	return fmt.Sprintf("%x", hashed)
+
+	return base64.RawURLEncoding.EncodeToString(hashed[:])
 
 }

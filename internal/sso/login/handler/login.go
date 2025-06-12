@@ -21,7 +21,7 @@ func (h *LoginHandler) PostLogin(c *gin.Context) {
 
 	//verify JSON binding
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -31,8 +31,11 @@ func (h *LoginHandler) PostLogin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	callback_uri := res.RedirectURI + "?code=" + res.AuthCode + "&state=" + res.State
+	callback_uri := res.RedirectURI
 	c.JSON(http.StatusOK, gin.H{
-		"redirect_url": callback_uri})
+		"code":         res.AuthCode,
+		"state":        res.State,
+		"nonce":        res.Nonce,
+		"redirect_uri": callback_uri})
 
 }

@@ -56,6 +56,8 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 		Type:            "code",
 		ExpiredDatetime: time.Now().Add(5 * time.Minute),
 		CreatedDatetime: time.Now(),
+		Username:        req.Username,
+		
 	}
 	if err := s.repository.SaveAuthCode(ctx, authCodeRecord); err != nil {
 		return nil, errors.New("failed to save auth code")
@@ -64,11 +66,11 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 	//create cookie on browser
 	session_id := uuid.New().String()
 	http.SetCookie(ctx.Writer, &http.Cookie{
-		Name:     "sso_session",
-		Value:    session_id,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
+		Name:  "sso_session",
+		Value: session_id,
+		Path:  "/",
+		// HttpOnly: true,
+		// Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().Add(24 * time.Hour), // Set cookie expiration
 	})
@@ -77,6 +79,7 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 		AuthCode:    authCodeRecord.Code,
 		RedirectURI: authReq.AuthRedirectCallbackURI,
 		State:       authReq.State,
+		Nonce:       authReq.Nonce,
 	}
 	return loginResponse, nil
 

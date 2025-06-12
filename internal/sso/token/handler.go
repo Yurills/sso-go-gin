@@ -16,7 +16,7 @@ func (h *TokenHandler) PostToken(c *gin.Context) {
 	var req TokenRequest
 
 	// Verify JSON binding
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid request format"})
 		return
 	}

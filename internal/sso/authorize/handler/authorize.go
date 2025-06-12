@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"sso-go-gin/internal/sso/authorize/dtos"
 	"sso-go-gin/internal/sso/authorize/service"
@@ -30,7 +31,7 @@ func (h *AuthorizeHandler) GetAuthorize(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"rid": res.RID,
-	})
+	LoginURL := fmt.Sprintf("/login?rid=%s&csrf_token=%s&client_id=%s", res.RID, res.CRSFSes, req.ClientID)
+
+	c.Redirect(http.StatusFound, LoginURL)
 }

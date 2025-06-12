@@ -28,7 +28,7 @@ type AuthRequestCode struct {
 	ClientID                uuid.UUID `json:"client_id" gorm:"type:uuid;not null"`
 	ResponseType            string    `json:"response_type" gorm:"type:varchar(30);not null"`
 	Scope                   string    `json:"scope" gorm:"type:varchar(100)"`
-	State                   string    `json:"state" gorm:"type:varchar(40);uniqueIndex;not null"`
+	State                   string    `json:"state" gorm:"type:varchar(40);not null"`
 	Nonce                   string    `json:"nonce" gorm:"type:varchar(40);uniqueIndex"`
 	CodeChallenge           string    `json:"code_challenge" gorm:"type:varchar(100);uniqueIndex;not null"`
 	CodeChallengeMethod     string    `json:"code_challenge_method" gorm:"type:varchar(10);not null"`
@@ -50,6 +50,7 @@ type AuthCode struct {
 	Type            string    `json:"type" gorm:"type:varchar(3);not null"`
 	ExpiredDatetime time.Time `json:"expired_datetime" gorm:"not null"`
 	CreatedDatetime time.Time `json:"created_datetime" gorm:"not null;default:now()"`
+	Username        string    `json:"username" gorm:"type:varchar(50);not null"`
 }
 
 func (a *AuthCode) IsExpired() bool {

@@ -7,7 +7,9 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"path/filepath"
 	"sso-go-gin/config"
 	"sso-go-gin/internal/sso"
 	handler2 "sso-go-gin/internal/sso/authorize/handler"
@@ -15,6 +17,7 @@ import (
 	handler3 "sso-go-gin/internal/sso/par/handler"
 	"sso-go-gin/internal/sso/token"
 	"sso-go-gin/pkg/database"
+	"strings"
 )
 
 // Injectors from wire.go:
@@ -38,11 +41,36 @@ func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
 func newRouter(h *sso.SSOHandlers) *gin.Engine {
 	r := gin.Default()
 
-	ssoGroup := r.Group("/sso")
+	r.Use(cors.New((cors.Config{
+		AllowOrigins:     []string{"http://localhost:8081", "http://localhost:8082"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	})))
+
+	ssoGroup := r.Group("/api/sso")
 	handler.RegisterRoutes(ssoGroup, h.LoginHandler)
 	handler2.RegisterRoutes(ssoGroup, h.AuthorizeHandler)
 	token.RegisterRoutes(ssoGroup, h.TokenHandler)
 	handler3.RegisterRoutes(ssoGroup, h.PARHandler)
+
+	staticDir := "./frontend/dist"
+	r.Static("/assets", filepath.Join(staticDir, "assets"))
+
+	r.NoRoute(func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, "/api") {
+			c.JSON(404, gin.H{"error": "Not Found"})
+			return
+		}
+
+		if strings.Contains(c.Request.URL.Path, ".") {
+			c.Status(404)
+			return
+		}
+
+		c.File(filepath.Join(staticDir, "index.html"))
+	})
 
 	return r
 }

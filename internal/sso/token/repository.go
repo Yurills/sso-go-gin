@@ -15,6 +15,14 @@ func NewTokenRepository(db *gorm.DB) *TokenRepository {
 	return &TokenRepository{db}
 }
 
+func (r *TokenRepository) GetClientUUIDByClientID(c context.Context, client_id string) (string, error) {
+	var client models.AuthClient
+	if err := r.db.WithContext(c).First(&client, "client_id = ?", client_id).Error; err != nil {
+		return "", err
+	}
+	return client.ID.String(), nil
+}
+
 func (r *TokenRepository) GetAuthRequestByClientID(c context.Context, client_id string) (*models.AuthRequestCode, error) {
 	var req models.AuthRequestCode
 	if err := r.db.WithContext(c).First(&req, "client_id = ?", client_id).Error; err != nil {

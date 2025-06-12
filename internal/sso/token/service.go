@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sso-go-gin/pkg/utils/hashutil"
 	"sso-go-gin/pkg/utils/randomutil"
+	"sso-go-gin/pkg/utils/tokenutil"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,12 +20,16 @@ func NewTokenService(repository *TokenRepository) *TokenService {
 func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*TokenResponse, error) {
 
 	//verify grant type
-	if req.GrantType != "access_token" {
+	if req.GrantType != "authorization_code" {
 		return nil, errors.New("invalid grant type")
 	}
 
+	client_id, err := s.repository.GetClientUUIDByClientID(ctx, req.ClientID)
+	if err != nil {
+		return nil, errors.New("invalid client ID")
+	}
 	//verify client id
-	auth_request, err := s.repository.GetAuthRequestByClientID(ctx, req.ClientID)
+	auth_request, err := s.repository.GetAuthRequestByClientID(ctx, client_id)
 	if err != nil {
 		return nil, errors.New("invalid client ID")
 	}
@@ -48,7 +53,7 @@ func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*Token
 		return nil, errors.New(req.CodeVerifier + " does not match the code challenge:" + hashedCodeVerifier + " != " + auth_request.CodeChallenge)
 	}
 
-	accesstoken, err := randomutil.GenerateRandomString(32)
+	accesstoken, err := tokenutil.GenerateJWTToken(code.Username, 3600)
 	if err != nil {
 		return nil, errors.New("failed to generate access token")
 	}
