@@ -2,6 +2,7 @@ package token
 
 import (
 	"errors"
+	"log"
 	"sso-go-gin/pkg/utils/hashutil"
 	"sso-go-gin/pkg/utils/randomutil"
 	"sso-go-gin/pkg/utils/tokenutil"
@@ -18,24 +19,11 @@ func NewTokenService(repository *TokenRepository) *TokenService {
 }
 
 func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*TokenResponse, error) {
+	//verify nonce
 
 	//verify grant type
 	if req.GrantType != "authorization_code" {
 		return nil, errors.New("invalid grant type")
-	}
-
-	client_id, err := s.repository.GetClientUUIDByClientID(ctx, req.ClientID)
-	if err != nil {
-		return nil, errors.New("invalid client ID")
-	}
-	//verify client id
-	auth_request, err := s.repository.GetAuthRequestByClientID(ctx, client_id)
-	if err != nil {
-		return nil, errors.New("invalid client ID")
-	}
-
-	if auth_request.IsExpired() {
-		return nil, errors.New("auth request is expired")
 	}
 
 	//verify authorization code
@@ -47,13 +35,32 @@ func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*Token
 		return nil, errors.New("authorization code is expired")
 	}
 
+	//verify client id
+	auth_request, err := s.repository.GetAuthRequestByID(ctx, code.RID.String())
+	if err != nil {
+		return nil, errors.New("invalid client ID")
+	}
+
+	if auth_request.IsExpired() {
+		return nil, errors.New("auth request is expired")
+	}
+
 	//verify code challenge
 	hashedCodeVerifier := hashutil.HashedCodeVerifier(req.CodeVerifier)
 	if hashedCodeVerifier != auth_request.CodeChallenge {
+		log.Println(req.CodeVerifier + " does not match the code challenge:" + hashedCodeVerifier + " != " + auth_request.CodeChallenge)
+
 		return nil, errors.New(req.CodeVerifier + " does not match the code challenge:" + hashedCodeVerifier + " != " + auth_request.CodeChallenge)
+
 	}
 
-	accesstoken, err := tokenutil.GenerateJWTToken(code.Username, 3600)
+	//verify user
+	user, err := s.repository.GetUserByUsername(ctx, code.Username)
+	if err != nil {
+		return nil, errors.New("invalid username")
+	}
+
+	accesstoken, err := tokenutil.GenerateJWTToken(code.Username, user.Email, *auth_request.Nonce, 3600)
 	if err != nil {
 		return nil, errors.New("failed to generate access token")
 	}

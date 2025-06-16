@@ -9,10 +9,10 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	AuthCode    string `json:"auth_code"`
-	RedirectURI string `json:"redirect_uri"`
-	State       string `json:"state"`
-	Nonce       string `json:"nonce,omitempty"`
+	AuthCode    string  `json:"auth_code"`
+	RedirectURI string  `json:"redirect_uri"`
+	State       string  `json:"state"`
+	Nonce       *string `json:"nonce,omitempty"`
 }
 
 type TokenRequest struct {

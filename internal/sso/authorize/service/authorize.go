@@ -34,6 +34,10 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 	if !authClient.Active {
 		return nil, errors.New("client not active")
 	}
+	//verify redirect uri
+	if req.RedirectURI != authClient.AuthRedirectCallbackURI {
+		return nil, errors.New("invalid redirect URI")
+	}
 
 	//generate csrf_token
 	csrfToken, err := randomutil.GenerateRandomString(64)
@@ -41,14 +45,12 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 		return nil, errors.New("failed to generate CSRF token")
 	}
 
-	
-
 	authRequestCode := &models.AuthRequestCode{
 		ID:                      uuid.New(),
 		ClientID:                authClient.ID,
 		ResponseType:            req.ResponseType,
 		State:                   req.State,
-		Nonce:                  req.Nonce,
+		Nonce:                   &req.Nonce,
 		CodeChallenge:           req.CodeChallenge,
 		CodeChallengeMethod:     req.CodeChallengeMethod,
 		AuthRedirectCallbackURI: authClient.AuthRedirectCallbackURI,

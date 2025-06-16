@@ -6,12 +6,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type User struct {
 	ID       uuid.UUID `json:"id" gorm:"primaryKey;"`
 	Username string    `json:"username" gorm:"uniqueIndex;not null"`
 	Password string    `json:"password" gorm:"not null"`
+	Email    string    `json:"email" gorm:"type:varchar(100);uniqueIndex;not null"`
 }
 
 func (User) TableName() string {
@@ -29,7 +31,7 @@ type AuthRequestCode struct {
 	ResponseType            string    `json:"response_type" gorm:"type:varchar(30);not null"`
 	Scope                   string    `json:"scope" gorm:"type:varchar(100)"`
 	State                   string    `json:"state" gorm:"type:varchar(40);not null"`
-	Nonce                   string    `json:"nonce" gorm:"type:varchar(40);uniqueIndex"`
+	Nonce                   *string   `json:"nonce" gorm:"type:varchar(40);uniqueIndex"`
 	CodeChallenge           string    `json:"code_challenge" gorm:"type:varchar(100);uniqueIndex;not null"`
 	CodeChallengeMethod     string    `json:"code_challenge_method" gorm:"type:varchar(10);not null"`
 	AuthRedirectCallbackURI string    `json:"auth_redirect_callback_uri" gorm:"type:varchar(255)"`
@@ -41,6 +43,20 @@ type AuthRequestCode struct {
 func (a *AuthRequestCode) IsExpired() bool {
 	//return time.Now().After(a.ExpiredDatetime)
 	return false //for testing purposes
+}
+
+func (a *AuthRequestCode) BeforeCreate(tx *gorm.DB) (err error) {
+	if a.Nonce != nil && *a.Nonce == "" {
+		a.Nonce = nil
+	}
+	return nil
+}
+
+func (a *AuthRequestCode) AfterCreate(tx *gorm.DB) (err error) {
+	if a.Nonce != nil && *a.Nonce == "" {
+		a.Nonce = nil
+	}
+	return nil
 }
 
 type AuthCode struct {
