@@ -60,7 +60,14 @@ func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*Token
 		return nil, errors.New("invalid username")
 	}
 
-	accesstoken, err := tokenutil.GenerateJWTToken(code.Username, user.Email, *auth_request.Nonce, 3600)
+	jwtParams := tokenutil.JWTTokenParams{
+		Username: code.Username,
+		Email:    user.Email,
+		Nonce:    *auth_request.Nonce,
+		TTL:      3600, // Set token expiration time (1 hour)
+	}
+
+	accesstoken, err := tokenutil.GenerateJWTToken(jwtParams)
 	if err != nil {
 		return nil, errors.New("failed to generate access token")
 	}

@@ -28,6 +28,10 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 		return nil, errors.New("missing required parameters")
 	}
 
+	
+
+
+
 	//check if RID is provided and not expired
 	authReq, err := s.repository.GetAuthRequestByID(ctx, req.RID)
 	if err != nil || authReq.IsExpired() {

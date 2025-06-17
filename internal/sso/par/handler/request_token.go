@@ -2,18 +2,12 @@ package handler
 
 import (
 	"sso-go-gin/internal/sso/par/dtos"
-	"sso-go-gin/internal/sso/par/service"
+	
 
 	"github.com/gin-gonic/gin"
 )
 
-type PARHandler struct {
-	Service *service.PARService
-}
 
-func NewPARHandler(service *service.PARService) *PARHandler {
-	return &PARHandler{Service: service}
-}
 
 func (h *PARHandler) PostRequestToken(c *gin.Context) {
 	// Call the service to handle the request token

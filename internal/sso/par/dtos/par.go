@@ -1,9 +1,10 @@
 package dtos
 
 type PARRequestTokenRequest struct {
-	ClientID    string `json:"client_id" binding:"required"`
-	Source      string `json:"source" binding:"required"`
-	Destination string `json:"destination" binding:"required"`
+	ClientID        string `json:"client_id" binding:"required"`
+	Source          string `json:"source" binding:"required"`
+	Destination     string `json:"destination" binding:"required"`
+	DestinationLink string `json:"destination_link" binding:"required"`
 }
 
 type PARRequestTokenResponse struct {

@@ -21,6 +21,8 @@ func NewAuthorizeService(repo *repository.AuthorizeRepository) *AuthorizeService
 }
 
 func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest) (*dtos.AuthroizeResponse, error) {
+	//TODO: skip login if session exists
+	
 	//verify required parameter
 	if req.CodeChallenge == "" || req.State == "" || req.ResponseType != "code" || req.CodeChallengeMethod != "S256" {
 		return nil, errors.New("invalid request parameter")
@@ -43,8 +45,8 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 	csrfToken, err := randomutil.GenerateRandomString(64)
 	if err != nil {
 		return nil, errors.New("failed to generate CSRF token")
-	}
-
+	}	
+	
 	authRequestCode := &models.AuthRequestCode{
 		ID:                      uuid.New(),
 		ClientID:                authClient.ID,
@@ -75,3 +77,4 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 	return authorizeResponse, nil
 
 }
+

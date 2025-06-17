@@ -108,13 +108,14 @@ func (s *SSOToken) IsExpired() bool {
 }
 
 type SSORequestURI struct {
-	ID                 uuid.UUID `json:"id" gorm:"type:uuid;primaryKey;"`
-	User               string    `json:"user" gorm:"type:varchar(50);not null"`
-	RedirectURI        string    `json:"redirect_uri" gorm:"type:varchar(255);not null"`
-	SSOToken           string    `json:"sso_token" gorm:"type:varchar(100);not null"`
-	GetAuthRequestByID uuid.UUID `json:"get_auth_request_by_id" gorm:"type:uuid;not null"`
-	ExpiredDatetime    time.Time `json:"expired_datetime" gorm:"not null"`
-	CreatedDatetime    time.Time `json:"created_datetime" gorm:"not null;default:now()"`
+	ID              uuid.UUID `json:"id" gorm:"type:uuid;primaryKey;"`
+	User            string    `json:"user" gorm:"type:varchar(50);not null"`
+	ClientID        uuid.UUID `json:"client_id" gorm:"type:uuid;not null"`
+	RequestURI      string    `json:"request_uri" gorm:"type:varchar(255);not null;uniqueIndex"`
+	SSOToken        string    `json:"sso_token" gorm:"type:varchar(100);not null"`
+	AuthRequestID   uuid.UUID `json:"auth_request_id" gorm:"type:uuid;not null"`
+	ExpiredDatetime time.Time `json:"expired_datetime" gorm:"not null"`
+	CreatedDatetime time.Time `json:"created_datetime" gorm:"not null;default:now()"`
 }
 
 func (s *SSORequestURI) IsExpired() bool {

@@ -25,18 +25,10 @@ func (r *PARRepository) GetAuthRequestByClientID(c context.Context, clientID str
 
 func (r *PARRepository) GetAuthClientByID(c context.Context, clientID string) (*models.AuthClient, error) {
 	var authClient models.AuthClient
-	if err := r.db.WithContext(c).Where("client_id = ?", clientID).First(&authClient).Error; err != nil {
+	if err := r.db.WithContext(c).Where("id = ?", clientID).First(&authClient).Error; err != nil {
 		return nil, err
 	}
 	return &authClient, nil
-}
-
-func (r *PARRepository) GetSSOTokenByClientID(c context.Context, clientID string) (*models.SSOToken, error) {
-	var ssoToken models.SSOToken
-	if err := r.db.WithContext(c).Where("client_id = ?", clientID).First(&ssoToken).Error; err != nil {
-		return nil, err
-	}
-	return &ssoToken, nil
 }
 
 func (r *PARRepository) SaveSSOToken(c context.Context, token *models.SSOToken) error {
@@ -49,4 +41,12 @@ func (r *PARRepository) SaveAuthRequest(c context.Context, req *models.AuthReque
 
 func (r *PARRepository) SaveSSORequestURI(c context.Context, uri *models.SSORequestURI) error {
 	return r.db.WithContext(c).Create(uri).Error
+}
+
+func (r *PARRepository) GetSSOTokenByToken(c context.Context, tokenID string) (*models.SSOToken, error) {
+	var ssoToken models.SSOToken
+	if err := r.db.WithContext(c).Where("token = ?", tokenID).First(&ssoToken).Error; err != nil {
+		return nil, err
+	}
+	return &ssoToken, nil
 }
