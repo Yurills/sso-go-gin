@@ -59,7 +59,7 @@ func (s *PARService) GetRequestToken(c *gin.Context, req *dtos.PARRequestTokenRe
 	sso_token := &models.SSOToken{
 		ID:              uuid.New(),
 		Token:           token, // Generate a random token
-		ClientID:        uuid.MustParse(req.ClientID),
+		ClientID:        (authClient.ID),
 		Source:          req.Source,
 		Destination:     req.Destination,
 		ExpiredDatetime: time.Now().Add(60 * time.Second), // Set expiration time to 60 seconds

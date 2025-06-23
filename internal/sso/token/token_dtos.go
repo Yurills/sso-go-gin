@@ -1,11 +1,11 @@
 package token
 
 type TokenRequest struct {
-	ClientID     string `form:"client_id" binding:"required"`
-	GrantType    string `form:"grant_type" binding:"required"`
-	Code 	   string `form:"code" binding:"required"`
-	CodeVerifier string `form:"code_verifier" binding:"required"`
-	Nonce 	  string `form:"nonce"`
+	ClientID     string `form:"client_id" json:"client_id" binding:"required"`
+	GrantType    string `form:"grant_type" json:"grant_type" binding:"required"`
+	Code         string `form:"code" json:"code" binding:"required"`
+	CodeVerifier string `form:"code_verifier" json:"code_verifier" binding:"required"`
+	Nonce        string `form:"nonce" json:"nonce"`
 }
 
 type TokenResponse struct {

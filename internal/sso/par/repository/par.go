@@ -25,7 +25,7 @@ func (r *PARRepository) GetAuthRequestByClientID(c context.Context, clientID str
 
 func (r *PARRepository) GetAuthClientByID(c context.Context, clientID string) (*models.AuthClient, error) {
 	var authClient models.AuthClient
-	if err := r.db.WithContext(c).Where("id = ?", clientID).First(&authClient).Error; err != nil {
+	if err := r.db.WithContext(c).Where("client_id = ?", clientID).First(&authClient).Error; err != nil {
 		return nil, err
 	}
 	return &authClient, nil

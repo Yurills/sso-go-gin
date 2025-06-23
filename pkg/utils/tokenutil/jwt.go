@@ -10,9 +10,9 @@ var jwtSecret = []byte("sso-go-gin-secret")
 
 type JWTTokenParams struct {
 	Username string
-	Email  string
-	Nonce  string
-	TTL    time.Duration
+	Email    string
+	Nonce    *string
+	TTL      time.Duration
 }
 
 func GenerateJWTToken(params JWTTokenParams) (string, error) {
@@ -21,7 +21,9 @@ func GenerateJWTToken(params JWTTokenParams) (string, error) {
 		"iat":   time.Now().Unix(),
 		"exp":   time.Now().Add(time.Second * time.Duration(params.TTL)).Unix(), // Token valid for 24 hours
 		"email": params.Email,
-		"nonce": params.Nonce,
+	}
+	if params.Nonce != nil {
+		claims["nonce"] = *params.Nonce
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

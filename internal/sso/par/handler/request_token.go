@@ -2,12 +2,9 @@ package handler
 
 import (
 	"sso-go-gin/internal/sso/par/dtos"
-	
 
 	"github.com/gin-gonic/gin"
 )
-
-
 
 func (h *PARHandler) PostRequestToken(c *gin.Context) {
 	// Call the service to handle the request token
@@ -23,7 +20,9 @@ func (h *PARHandler) PostRequestToken(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
+	// c.Redirect(http.StatusFound, req.DestinationLink+"?sso_token="+response.Token)
 	c.JSON(200, gin.H{
-		"token": response.Token,
+		"destination_link": req.DestinationLink + "?sso_token=" + response.Token,
+		// "token": response.Token,
 	})
 }

@@ -63,7 +63,7 @@ func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*Token
 	jwtParams := tokenutil.JWTTokenParams{
 		Username: code.Username,
 		Email:    user.Email,
-		Nonce:    *auth_request.Nonce,
+		Nonce:    auth_request.Nonce,
 		TTL:      3600, // Set token expiration time (1 hour)
 	}
 

@@ -74,7 +74,7 @@ func (s *PARService) CreateRequestURI(c *gin.Context, req dtos.PARRequest) (*dto
 
 	ssoRequestURI := &models.SSORequestURI{
 		ID:              uuid.New(),
-		ClientID:        uuid.MustParse(req.ClientID),
+		ClientID:        client.ID,
 		SSOToken:        req.SSOToken,
 		User:            ssoToken.User,
 		RequestURI:      requestURI,
@@ -87,7 +87,7 @@ func (s *PARService) CreateRequestURI(c *gin.Context, req dtos.PARRequest) (*dto
 	}
 
 	return &dtos.PARResponse{
-		RedirectURI: ssoRequestURI.RequestURI,
+		RequestURI: ssoRequestURI.RequestURI,
 	}, nil
 
 }

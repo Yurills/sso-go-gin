@@ -21,5 +21,14 @@ type PARRequest struct {
 }
 
 type PARResponse struct {
+	RequestURI string `json:"request_uri" binding:"required"`
+}
+
+type PARRequestAuthorize struct {
+	RequestURI string `json:"request_uri" binding:"required"`
+}
+
+type PARResponseAuthorize struct {
 	RedirectURI string `json:"redirect_uri" binding:"required"`
+	Code        string `json:"code" binding:"required"`
 }
