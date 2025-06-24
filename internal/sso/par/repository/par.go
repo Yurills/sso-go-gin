@@ -50,3 +50,11 @@ func (r *PARRepository) GetSSOTokenByToken(c context.Context, tokenID string) (*
 	}
 	return &ssoToken, nil
 }
+
+func (r *PARRepository) GetAuthClientByName(c context.Context, clientName string) (*models.AuthClient, error) {
+	var authClient models.AuthClient
+	if err := r.db.WithContext(c).Where("name = ?", clientName).First(&authClient).Error; err != nil {
+		return nil, err
+	}
+	return &authClient, nil
+}

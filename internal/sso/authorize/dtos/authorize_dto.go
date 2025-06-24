@@ -11,7 +11,14 @@ type AuthorizeRequest struct {
 	Nonce               string `form:"nonce"`
 }
 
-type AuthroizeResponse struct {
+type AuthorizeResponse struct {
 	RID     string `json:"r_id"`
 	CRSFSes string `json:"csrf_ses" binding:"required"`
+}
+
+type AuthorizeSessionResponse struct {
+	AuthCode    string  `json:"auth_code"`
+	RedirectURI string  `json:"redirect_uri"`
+	State       string  `json:"state"`
+	Nonce       *string `json:"nonce,omitempty"`
 }

@@ -25,13 +25,32 @@ func (h *AuthorizeHandler) GetAuthorize(c *gin.Context) {
 		return
 	}
 
-	res, err := h.AuthorizeService.Authorize(c, req)
+	// If the user is already logged in, redirect to the callback URL
+	sessionID, err := c.Cookie("session_id")
+	if err != nil {
+		session := h.AuthorizeService.ValidSession(c, sessionID)
+		if !session {
+			// no session, redirect to the login
+			res, err := h.AuthorizeService.Authorize(c, req)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			LoginURL := fmt.Sprintf("/login?rid=%s&client_id=%s", res.RID, req.ClientID)
+			c.Redirect(http.StatusFound, LoginURL)
+			return
+		}
+	}
+
+	res, err := h.AuthorizeService.GenerateAuthCode(c, sessionID, req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	callbackurl := res.RedirectURI + "?code=" + res.AuthCode + "&state=" + res.State
+	if res.Nonce != nil && *res.Nonce != "" {
+		callbackurl += "&nonce=" + *res.Nonce
+	}
+	c.Redirect(http.StatusFound, callbackurl)
 
-	LoginURL := fmt.Sprintf("/login?rid=%s&csrf_token=%s&client_id=%s", res.RID, res.CRSFSes, req.ClientID)
-
-	c.Redirect(http.StatusFound, LoginURL)
 }

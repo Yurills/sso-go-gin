@@ -1,12 +1,11 @@
 package repository
+
 import (
 	"context"
 
 	"gorm.io/gorm"
 
 	"sso-go-gin/internal/sso/models"
-
-	
 )
 
 type LoginRepository struct {
@@ -42,4 +41,8 @@ func (r *LoginRepository) GetUserInfo(c context.Context, username string) (*mode
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (r *LoginRepository) SaveSession(c context.Context, session *models.Session) error {
+	return r.db.WithContext(c).Create(session).Error
 }

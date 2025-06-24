@@ -46,3 +46,11 @@ func (r *TokenRepository) GetUserByUsername(c context.Context, username string) 
 	}
 	return &user, nil
 }
+
+func (r *TokenRepository) GetSSOTokenByClientID(c context.Context, id string) (*models.SSOToken, error) {
+	var ssoToken models.SSOToken
+	if err := r.db.WithContext(c).First(&ssoToken, "client_id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &ssoToken, nil
+}

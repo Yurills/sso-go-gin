@@ -21,8 +21,10 @@ func (h *PARHandler) PostRequestToken(c *gin.Context) {
 		return
 	}
 	// c.Redirect(http.StatusFound, req.DestinationLink+"?sso_token="+response.Token)
+	destination := response.RedirectURI + "?sso_token=" + response.Token
 	c.JSON(200, gin.H{
-		"destination_link": req.DestinationLink + "?sso_token=" + response.Token,
+		"destination_link": destination,
+		"sso_token":        response.Token,
 		// "token": response.Token,
 	})
 }

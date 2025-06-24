@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"net/http"
+
 	"time"
 
 	"sso-go-gin/internal/sso/login/dtos"
@@ -28,10 +28,6 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 		return nil, errors.New("missing required parameters")
 	}
 
-	
-
-
-
 	//check if RID is provided and not expired
 	authReq, err := s.repository.GetAuthRequestByID(ctx, req.RID)
 	if err != nil || authReq.IsExpired() {
@@ -47,6 +43,17 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 		return nil, errors.New("wrong password")
 	}
 
+	//check csrf token
+	csrfCookie, err := ctx.Request.Cookie("csrf_token")
+	if err != nil {
+		return nil, errors.New("missing CSRF token")
+	}
+
+	csrfHeader := ctx.GetHeader("X-csrf_token")
+	if csrfHeader != csrfCookie.Value {
+		return nil, errors.New("invalid CSRF token")
+	}
+
 	//generate auth code and insert into database
 	authCode, err := randomutil.GenerateRandomString(32) // Generate a random auth code
 	if err != nil {
@@ -58,7 +65,7 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 		Code:            authCode,
 		RID:             uuid.MustParse(req.RID),
 		Type:            "code",
-		ExpiredDatetime: time.Now().Add(5 * time.Minute),
+		ExpiredDatetime: time.Now().Add(24 * time.Hour), // Set expiration time
 		CreatedDatetime: time.Now(),
 		Username:        req.Username,
 	}
@@ -67,16 +74,18 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 	}
 
 	//create cookie on browser
-	session_id := uuid.New().String()
-	http.SetCookie(ctx.Writer, &http.Cookie{
-		Name:  "sso_session",
-		Value: session_id,
-		Path:  "/",
-		// HttpOnly: true,
-		// Secure:   true,
-		SameSite: http.SameSiteLaxMode,
-		Expires:  time.Now().Add(24 * time.Hour), // Set cookie expiration
-	})
+	sessionID := uuid.New().String()
+	session := &models.Session{
+		ID:              uuid.MustParse(sessionID),
+		UserID:          user.ID,
+		CreatedDatetime: time.Now(),
+		ExpiredDatetime: time.Now().Add(24 * time.Hour),
+	}
+	if err := s.repository.SaveSession(ctx, session); err != nil {
+		return nil, errors.New("failed to save session")
+	}
+
+	ctx.SetCookie("session_id", sessionID, 86400, "/", "", false, true) // Set cookie for 1 day
 
 	loginResponse := &dtos.LoginResponse{
 		AuthCode:    authCodeRecord.Code,

@@ -36,9 +36,9 @@ func (s *PARService) CreateRequestURI(c *gin.Context, req dtos.PARRequest) (*dto
 		return nil, errors.New("client is not active")
 	}
 	//check callback uri
-	if req.RedirectURI != client.SSORedirectCallbackURI {
-		return nil, errors.New("redirect URI does not match client configuration")
-	}
+	// if req.RedirectURI != client.SSORedirectCallbackURI {
+	// 	return nil, errors.New("redirect URI does not match client configuration")
+	// }
 
 	//verify SSO token
 	ssoToken, err := s.repository.GetSSOTokenByToken(c, req.SSOToken)

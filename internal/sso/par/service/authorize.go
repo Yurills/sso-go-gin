@@ -13,12 +13,18 @@ import (
 
 func (s *PARService) Authorize(c *gin.Context, req dtos.PARRequestAuthorize) (*dtos.PARResponseAuthorize, error) {
 	// Validate the request
-	ssoRequestURI, err := s.repository.GetSSOTokenByRequestURI(c, req.RequestURI)
+	ssoRequestURI, err := s.repository.GetSSORequestURIByRequestURI(c, req.RequestURI)
 	if err != nil {
 		return nil, errors.New("SSO request URI not found")
 	}
 	if ssoRequestURI.IsExpired() {
 		return nil, errors.New("SSO request URI is expired")
+	}
+
+	// check SSO Token
+	ssoToken, err := s.repository.GetSSOTokenByToken(c, ssoRequestURI.SSOToken)
+	if err != nil {
+		return nil, errors.New("SSO token not found")
 	}
 
 	// Create the response
@@ -47,7 +53,7 @@ func (s *PARService) Authorize(c *gin.Context, req dtos.PARRequestAuthorize) (*d
 
 	response := &dtos.PARResponseAuthorize{
 		Code:        authCode,
-		RedirectURI: authRequest.SSORedirectCallbackURI,
+		RedirectURI: ssoToken.Destination,
 	}
 	return response, nil
 }

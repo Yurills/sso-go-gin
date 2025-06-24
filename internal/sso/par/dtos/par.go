@@ -8,7 +8,8 @@ type PARRequestTokenRequest struct {
 }
 
 type PARRequestTokenResponse struct {
-	Token string `json:"token" binding:"required"`
+	RedirectURI string `json:"redirect_uri" binding:"required"`
+	Token       string `json:"token" binding:"required"`
 }
 
 type PARRequest struct {

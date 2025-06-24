@@ -46,3 +46,25 @@ func (r *AuthorizeRepository) GetCSRFToken(c context.Context, csrfToken string) 
 	}
 	return val, nil
 }
+
+func (r *AuthorizeRepository) GetSessionByID(c context.Context, sessionID string) (*models.Session, error) {
+	var session models.Session
+	if err := r.db.WithContext(c).First(&session, "id = ?", sessionID).Error; err != nil {
+		return nil, err
+	}
+	return &session, nil
+}
+
+func (r *AuthorizeRepository) GetUserInfoBySessionID(c context.Context, sessionID string) (*models.User, error) {
+	var user models.User
+	//join session and user_info table
+	if err := r.db.WithContext(c).Table("user_info").Select("user_info.*").
+		Joins("JOIN sessions ON user_info.id = sessions.user_id").
+		Where("sessions.id = ?", sessionID).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+func (r *AuthorizeRepository) SaveAuthCode(c context.Context, authCode *models.AuthCode) error {
+	return r.db.WithContext(c).Create(authCode).Error
+}

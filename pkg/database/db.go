@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"sso-go-gin/config"
+	"sso-go-gin/internal/sso/models"
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
@@ -23,11 +24,9 @@ func NewDB(config *config.Config) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	// db.AutoMigrate(
-	// 	&models.User{},
-	// 	&sso.AuthRequestCode{},
-	// 	&sso.AuthCode{},
-	// )
+	db.AutoMigrate(
+		models.Session{},
+	)
 
 	return db, nil
 

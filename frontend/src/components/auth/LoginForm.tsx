@@ -27,7 +27,16 @@ export const LoginForm = ({ clientApp, redirectUri, state, scope, responseType }
 
   const [searchParams] = useSearchParams();
   const rid = searchParams.get("rid");
-  const csrf_token = searchParams.get("csrf_token")
+  // const csrf_token = searchParams.get("csrf_token")
+
+
+
+
+  function getCSRFTokenFromCookie() {
+    const match = document.cookie.match(/csrf_token=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +47,7 @@ export const LoginForm = ({ clientApp, redirectUri, state, scope, responseType }
         username,
         password,
         client_id: clientApp || undefined,
-        csrf_ses: csrf_token,
+        csrf_ses: getCSRFTokenFromCookie() || undefined,
         rid: rid
       };
 

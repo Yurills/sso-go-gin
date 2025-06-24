@@ -9,9 +9,10 @@ type TokenRequest struct {
 }
 
 type TokenResponse struct {
-	AccessToken  string `json:"access_token"`
-	TokenType    string `json:"token_type"`
-	ExpiresIn    int    `json:"expires_in"`
-	RefreshToken string `json:"refresh_token,omitempty"`
-	Nonce        string `json:"nonce,omitempty"`
+	AccessToken     string `json:"access_token"`
+	TokenType       string `json:"token_type"`
+	ExpiresIn       int    `json:"expires_in"`
+	RefreshToken    string `json:"refresh_token,omitempty"`
+	Nonce           string `json:"nonce,omitempty"`
+	DestinationLink string `json:"destination_link,omitempty"` // Added to match the response structure
 }

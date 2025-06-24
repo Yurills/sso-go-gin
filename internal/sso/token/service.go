@@ -76,13 +76,22 @@ func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*Token
 		return nil, errors.New("failed to generate refresh token")
 	}
 
+	// Get destination link from SSO token, client id can have multiple SSO tokens so not really good solution
+	// If the SSO token is not found, destination_link will be an empty string
+	var destination_link string
+	sso_token, _ := s.repository.GetSSOTokenByClientID(ctx, auth_request.ClientID.String())
+	if sso_token != nil {
+		destination_link = sso_token.Destination
+	}
+
 	//generate access token
 	response := &TokenResponse{
-		AccessToken:  accesstoken, // Generate a random access token
-		TokenType:    "Bearer",
-		ExpiresIn:    3600,         // Set token expiration time (1 hour)
-		RefreshToken: refreshtoken, // Generate a random refresh token
-		Nonce:        req.Nonce,
+		AccessToken:     accesstoken, // Generate a random access token
+		TokenType:       "Bearer",
+		ExpiresIn:       3600,         // Set token expiration time (1 hour)
+		RefreshToken:    refreshtoken, // Generate a random refresh token
+		Nonce:           req.Nonce,
+		DestinationLink: destination_link,
 	}
 	return response, nil
 }

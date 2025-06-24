@@ -63,7 +63,10 @@ export const ssoApi = {
     try {
       const response = await fetch(`/api/sso/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-csrf_token': params.csrf_ses || '',
+        },
         body: JSON.stringify(params),
       });
       return await response.json();

@@ -28,11 +28,10 @@ func (h *TokenHandler) PostToken(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{
-		"access_token":  response.AccessToken,
-		"refresh_token": response.RefreshToken,
-		"expires_in":    response.ExpiresIn,
+		"access_token":     response.AccessToken,
+		"refresh_token":    response.RefreshToken,
+		"expires_in":       response.ExpiresIn,
+		"destination_link": response.DestinationLink,
 	})
 
 }
-
-

@@ -56,12 +56,17 @@ func (s *PARService) GetRequestToken(c *gin.Context, req *dtos.PARRequestTokenRe
 		return nil, errors.New("subject (sub) claim is missing or invalid in the token")
 	}
 
+	authClient2, err := s.repository.GetAuthClientByName(c, req.Destination)
+	if err != nil {
+		return nil, errors.New("failed to get auth client by name: " + err.Error())
+	}
+
 	sso_token := &models.SSOToken{
 		ID:              uuid.New(),
 		Token:           token, // Generate a random token
 		ClientID:        (authClient.ID),
 		Source:          req.Source,
-		Destination:     req.Destination,
+		Destination:     req.DestinationLink,
 		ExpiredDatetime: time.Now().Add(60 * time.Second), // Set expiration time to 60 seconds
 		User:            sub,
 	}
@@ -70,7 +75,8 @@ func (s *PARService) GetRequestToken(c *gin.Context, req *dtos.PARRequestTokenRe
 		return nil, errors.New("failed to save SSO token: " + err.Error())
 	}
 	response := &dtos.PARRequestTokenResponse{
-		Token: token,
+		RedirectURI: authClient2.SSORedirectCallbackURI,
+		Token:       token,
 	}
 	return response, nil
 
