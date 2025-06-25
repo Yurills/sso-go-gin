@@ -50,7 +50,11 @@ func (r *AuthorizeRepository) GetCSRFToken(c context.Context, csrfToken string) 
 
 func (r *AuthorizeRepository) GetSessionByID(c context.Context, sessionID string) (*models.Session, error) {
 	var session models.Session
-	if err := r.db.WithContext(c).First(&session, "id = ?", sessionID).Error; err != nil {
+	session_id, err := uuid.Parse(sessionID)
+	if err != nil {
+		return nil, err
+	}
+	if err := r.db.WithContext(c).First(&session, "id = ?", session_id).Error; err != nil {
 		return nil, err
 	}
 	return &session, nil
