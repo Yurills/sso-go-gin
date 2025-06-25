@@ -25,7 +25,13 @@ func NewDB(config *config.Config) (*gorm.DB, error) {
 		return nil, err
 	}
 	db.AutoMigrate(
+		models.AuthClient{},
+		models.AuthCode{},
+		models.AuthRequestCode{},
 		models.Session{},
+		models.User{},
+		models.SSOToken{},
+		models.SSORequestURI{},
 	)
 
 	return db, nil

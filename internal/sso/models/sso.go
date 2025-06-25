@@ -63,7 +63,7 @@ type AuthCode struct {
 	ID              uuid.UUID `json:"id" gorm:"type:uuid;primaryKey;"`
 	Code            string    `json:"code" gorm:"type:varchar(100);uniqueIndex;not null"`
 	RID             uuid.UUID `json:"rid" gorm:"type:uuid;not null;column:rid"`
-	Type            string    `json:"type" gorm:"type:varchar(3);not null"`
+	Type            string    `json:"type" gorm:"type:varchar(10);not null"`
 	ExpiredDatetime time.Time `json:"expired_datetime" gorm:"not null"`
 	CreatedDatetime time.Time `json:"created_datetime" gorm:"not null;default:now()"`
 	Username        string    `json:"username" gorm:"type:varchar(50);not null"`

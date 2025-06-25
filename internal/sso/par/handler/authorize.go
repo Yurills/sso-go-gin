@@ -20,5 +20,6 @@ func (h *PARHandler) PostAuthorize(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, gin.H{
+		"redirect_uri": response.RedirectURI})
 }

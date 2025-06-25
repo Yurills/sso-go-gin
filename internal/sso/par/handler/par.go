@@ -28,5 +28,6 @@ func (h *PARHandler) PostPARRequest(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, response)
+	c.JSON(200, gin.H{
+		"request_uri": response.RequestURI})
 }

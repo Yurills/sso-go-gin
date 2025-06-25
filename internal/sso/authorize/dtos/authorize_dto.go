@@ -13,7 +13,7 @@ type AuthorizeRequest struct {
 
 type AuthorizeResponse struct {
 	RID     string `json:"r_id"`
-	CRSFSes string `json:"csrf_ses" binding:"required"`
+	CRSFSes string `json:"csrf_ses"`
 }
 
 type AuthorizeSessionResponse struct {

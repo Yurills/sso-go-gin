@@ -5,6 +5,7 @@ import (
 	"sso-go-gin/internal/sso/models"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
@@ -58,9 +59,14 @@ func (r *AuthorizeRepository) GetSessionByID(c context.Context, sessionID string
 func (r *AuthorizeRepository) GetUserInfoBySessionID(c context.Context, sessionID string) (*models.User, error) {
 	var user models.User
 	//join session and user_info table
+	session_id, err := uuid.Parse(sessionID)
+	if err != nil {
+		return nil, err
+	}
+
 	if err := r.db.WithContext(c).Table("user_info").Select("user_info.*").
 		Joins("JOIN sessions ON user_info.id = sessions.user_id").
-		Where("sessions.id = ?", sessionID).First(&user).Error; err != nil {
+		Where("sessions.id = ?", session_id).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

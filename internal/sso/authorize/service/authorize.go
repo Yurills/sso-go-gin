@@ -78,8 +78,8 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 	}
 
 	authorizeResponse := &dtos.AuthorizeResponse{
-		RID: authRequestCode.ID.String(),
-		// CRSFSes: csrfToken,
+		RID:     authRequestCode.ID.String(),
+		CRSFSes: csrfToken,
 	}
 
 	return authorizeResponse, nil
