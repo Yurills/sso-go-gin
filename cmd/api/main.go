@@ -13,7 +13,7 @@ func main() {
 		log.Fatalf("failed to initialize app: %v", err)
 	}
 
-	if err := engine.Run(":8080"); err != nil {
+	if err := engine.RunTLS(":8080", "./certs/localhost+2.pem", "./certs/localhost+2-key.pem"); err != nil {
 		log.Fatalf("failed to run server: %v", err)
 	}
 

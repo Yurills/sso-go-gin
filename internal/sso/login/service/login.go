@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"net/http"
 
 	"time"
 
@@ -85,7 +86,15 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 		return nil, errors.New("failed to save session")
 	}
 
-	ctx.SetCookie("session_id", sessionID, 86400, "/", "", false, true) // Set cookie for 1 day
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     "session_id",
+		Value:    sessionID,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+	})
+	print("cookie saved with session ID:", sessionID)
 
 	loginResponse := &dtos.LoginResponse{
 		AuthCode:    authCodeRecord.Code,

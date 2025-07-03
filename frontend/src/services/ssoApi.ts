@@ -1,5 +1,5 @@
 // SSO API Configuration
-const API_BASE_URL = import.meta.env.VITE_SSO_API_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_SSO_API_URL || 'https://localhost:8080';
 
 export interface AuthorizeRequest {
   client_id: string;
@@ -31,6 +31,7 @@ export interface LoginResponse {
   code?: string;
   error?: string;
   nonce?: string;
+  state?: string;
 }
 
 export interface TokenResponse {

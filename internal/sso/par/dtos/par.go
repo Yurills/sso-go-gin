@@ -33,3 +33,10 @@ type PARResponseAuthorize struct {
 	RedirectURI string `json:"redirect_uri" binding:"required"`
 	Code        string `json:"code" binding:"required"`
 }
+
+type PARSessionResponse struct {
+	RefreshToken string  `json:"refresh_token" binding:"required"`
+	RedirectURI  string  `json:"redirect_uri" binding:"required"`
+	State        string  `json:"state" binding:"required"`
+	Nonce        *string `json:"nonce,omitempty"`
+}

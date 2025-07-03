@@ -27,6 +27,7 @@ func (h *AuthorizeHandler) GetAuthorize(c *gin.Context) {
 
 	// If the user is already logged in, redirect to the callback URL
 	sessionID, err := c.Cookie("session_id")
+	print("Session ID from cookie:", sessionID, "Error:", err)
 	if err != nil {
 		session := h.AuthorizeService.ValidSession(c, sessionID)
 		if !session {

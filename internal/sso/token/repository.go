@@ -54,3 +54,19 @@ func (r *TokenRepository) GetSSOTokenByClientID(c context.Context, id string) (*
 	}
 	return &ssoToken, nil
 }
+
+func (r *TokenRepository) SaveRefreshToken(c context.Context, token *models.RefreshToken) error {
+	return r.db.WithContext(c).Create(token).Error
+}
+
+func (r *TokenRepository) GetRefreshToken(c context.Context, token string) (*models.RefreshToken, error) {
+	var refreshToken models.RefreshToken
+	if err := r.db.WithContext(c).First(&refreshToken, "refresh_token = ?", token).Error; err != nil {
+		return nil, err
+	}
+	return &refreshToken, nil
+}
+
+func (r *TokenRepository) UpdateRefreshToken(c context.Context, token *models.RefreshToken) error {
+	return r.db.WithContext(c).Save(token).Error
+}

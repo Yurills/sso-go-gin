@@ -23,6 +23,29 @@ func (h *PARHandler) PostPARRequest(c *gin.Context) {
 		return
 	}
 
+	//if session is active, skip request uri and send token directly
+	//TODO: recheck if it should be changed to refresh token
+	sessionID, err := c.Cookie("session_id")
+	if err != nil {
+		print("Error retrieving session ID from cookie:", err)
+	} else {
+		print("Session ID from cookie:", sessionID)
+	}
+	if sessionID != "" {
+		// Session is active, generate auth code directly
+		print("Session is active, generating refresh token directly\n")
+		token, err := h.Service.GenerateRefreshToken(c, sessionID, req)
+		if err != nil {
+			c.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{
+			"token": token.RefreshToken,
+			"state": token.State,
+		})
+		return
+	}
+
 	response, err := h.Service.CreateRequestURI(c, req)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})

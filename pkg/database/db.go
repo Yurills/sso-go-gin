@@ -32,6 +32,7 @@ func NewDB(config *config.Config) (*gorm.DB, error) {
 		models.User{},
 		models.SSOToken{},
 		models.SSORequestURI{},
+		models.RefreshToken{},
 	)
 
 	return db, nil

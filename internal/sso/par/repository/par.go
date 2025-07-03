@@ -4,6 +4,7 @@ import (
 	"context"
 	"sso-go-gin/internal/sso/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -57,4 +58,32 @@ func (r *PARRepository) GetAuthClientByName(c context.Context, clientName string
 		return nil, err
 	}
 	return &authClient, nil
+}
+
+func (r *PARRepository) GetUserInfoBySessionID(c context.Context, sessionID string) (*models.User, error) {
+	var user models.User
+	//join session and user_info table
+	session_id, err := uuid.Parse(sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := r.db.WithContext(c).Table("user_info").Select("user_info.*").
+		Joins("JOIN sessions ON user_info.id = sessions.user_id").
+		Where("sessions.id = ?", session_id).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *PARRepository) GetSessionByID(c context.Context, sessionID string) (*models.Session, error) {
+	var session models.Session
+	if err := r.db.WithContext(c).Where("id = ?", sessionID).First(&session).Error; err != nil {
+		return nil, err
+	}
+	return &session, nil
+}
+
+func (r *PARRepository) SaveRefreshToken(c context.Context, token *models.RefreshToken) error {
+	return r.db.WithContext(c).Create(token).Error
 }
