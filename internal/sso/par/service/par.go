@@ -91,3 +91,64 @@ func (s *PARService) CreateRequestURI(c *gin.Context, req dtos.PARRequest) (*dto
 	}, nil
 
 }
+
+func (s *PARService) GenerateAuthCode(c *gin.Context, sessionID string, req dtos.PARRequest) (*dtos.PARSessionResponse, error) {
+	authClient, err := s.repository.GetAuthClientByID(c, req.ClientID)
+	if err != nil {
+		return nil, errors.New("client not found")
+	}
+	if !authClient.Active {
+		return nil, errors.New("client is not active")
+	}
+
+	//verify redirect uri
+	if authClient.AuthRedirectCallbackURI == "" {
+		return nil, errors.New("redirect URI is not configured for the client")
+	}
+	authRequestCode := &models.AuthRequestCode{
+		ID:                      uuid.New(),
+		ClientID:                authClient.ID,
+		ResponseType:            "code",
+		State:                   req.State,
+		CodeChallenge:           req.CodeChallenge,
+		CodeChallengeMethod:     req.CodeChallengeMethod,
+		AuthRedirectCallbackURI: authClient.AuthRedirectCallbackURI,
+		SSORedirectCallbackURI:  authClient.SSORedirectCallbackURI,
+		ExpiredDatetime:         time.Now().Add(5 * time.Minute), // Set expiration
+		CreatedDatetime:         time.Now(),
+	}
+	if err := s.repository.SaveAuthRequest(c, authRequestCode); err != nil {
+		return nil, errors.New("failed to save auth request")
+	}
+
+	authCode, err := randomutil.GenerateRandomString(32)
+	if err != nil {
+		return nil, errors.New("failed to generate auth code")
+	}
+
+	user, err := s.repository.GetUserInfoBySessionID(c, sessionID)
+	if err != nil {
+		return nil, errors.New("failed to get user info")
+	}
+
+	authCodeRecord := &models.AuthCode{
+		ID:              uuid.New(),
+		Code:            authCode,
+		RID:             authRequestCode.ID,
+		Type:            "code",
+		ExpiredDatetime: time.Now().Add(5 * time.Minute), // Set expiration time
+		CreatedDatetime: time.Now(),
+		Username:        user.Username,
+	}
+	if err := s.repository.SaveAuthCode(c, authCodeRecord); err != nil {
+		return nil, errors.New("failed to save auth code")
+	}
+
+	PARSessionResponse := &dtos.PARSessionResponse{
+		AuthCode:    authCode,
+		RedirectURI: authClient.AuthRedirectCallbackURI,
+		State:       req.State,
+	}
+
+	return PARSessionResponse, nil
+}

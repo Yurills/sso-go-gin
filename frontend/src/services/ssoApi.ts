@@ -31,6 +31,7 @@ export interface LoginResponse {
   code?: string;
   error?: string;
   nonce?: string;
+  state?: string;
 }
 
 export interface TokenResponse {

@@ -41,8 +41,8 @@ type AuthRequestCode struct {
 }
 
 func (a *AuthRequestCode) IsExpired() bool {
-	//return time.Now().After(a.ExpiredDatetime)
-	return false //for testing purposes
+	return time.Now().After(a.ExpiredDatetime)
+	// return false //for testing purposes
 }
 
 func (a *AuthRequestCode) BeforeCreate(tx *gorm.DB) (err error) {
@@ -70,8 +70,8 @@ type AuthCode struct {
 }
 
 func (a *AuthCode) IsExpired() bool {
-	// return time.Now().After(a.ExpiredDatetime)
-	return false //for testing purposes
+	return time.Now().After(a.ExpiredDatetime)
+	// return false //for testing purposes
 }
 
 type AuthClient struct {
@@ -103,8 +103,8 @@ type SSOToken struct {
 }
 
 func (s *SSOToken) IsExpired() bool {
-	// return time.Now().After(s.ExpiredDatetime)
-	return false //for testing purposes
+	return time.Now().After(s.ExpiredDatetime)
+	// return false //for testing purposes
 }
 
 type SSORequestURI struct {
@@ -119,6 +119,21 @@ type SSORequestURI struct {
 }
 
 func (s *SSORequestURI) IsExpired() bool {
-	// return time.Now().After(s.ExpiredDatetime)
-	return false //for testing purposes
+	return time.Now().After(s.ExpiredDatetime)
+	// return false //for testing purposes
+}
+
+type RefreshToken struct {
+	ID              uuid.UUID `json:"id" gorm:"type:uuid;primaryKey;"`
+	RefreshToken    string    `json:"refresh_token" gorm:"type:varchar(100);uniqueIndex;not null"`
+	ClientID        uuid.UUID `json:"client_id" gorm:"type:uuid;not null"`
+	User            string    `json:"user" gorm:"type:varchar(50);not null"`
+	Email           string    `json:"email" gorm:"type:varchar(100);not null"`
+	ExpiredDatetime time.Time `json:"expired_datetime" gorm:"not null"`
+	CreatedDatetime time.Time `json:"created_datetime" gorm:"not null;default:now()"`
+}
+
+func (a *RefreshToken) IsExpired() bool {
+	return time.Now().After(a.ExpiredDatetime)
+	// return false //for testing purposes
 }

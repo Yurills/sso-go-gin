@@ -62,11 +62,11 @@ export const LoginForm = ({ clientApp, redirectUri, state, scope, responseType }
 
         console.log(response)
 
-        if (response.redirect_uri && response.code) {
+        if (response.redirect_uri && response.code && response.state) {
           // SSO flow - redirect back to client application
           const redirectUrl = new URL(response.redirect_uri );
           redirectUrl.searchParams.set('code', response.code);
-          if (state) redirectUrl.searchParams.set('state', state);
+          redirectUrl.searchParams.set('state', response.state);
           
           console.log('Redirecting to client with auth code:', response.code);
           

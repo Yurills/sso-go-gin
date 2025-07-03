@@ -23,6 +23,21 @@ func (h *PARHandler) PostPARRequest(c *gin.Context) {
 		return
 	}
 
+	//if session is active, skip request uri and send token directly
+	sessionID, err := c.Cookie("session_id")
+	if err == nil && sessionID != "" {
+		// Session is active, generate auth code directly
+		code, err := h.Service.GenerateAuthCode(c, sessionID, req)
+		if err != nil {
+			c.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{
+			"code": code,
+		})
+		return
+	}
+
 	response, err := h.Service.CreateRequestURI(c, req)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
