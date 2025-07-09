@@ -15,7 +15,7 @@ import (
 	"sso-go-gin/internal/sso/login"
 
 	"github.com/google/wire"
-	"github.com/redis/go-redis/v9"
+	
 	"gorm.io/gorm"
 )
 
@@ -26,7 +26,7 @@ type SSOHandlers struct {
 	PARHandler       *PARHandler.PARHandler
 }
 
-func InitializeSSOHandlers(cfg *config.Config, db *gorm.DB, redis *redis.Client) (*SSOHandlers, error) {
+func InitializeSSOHandlers(cfg *config.Config, db *gorm.DB) (*SSOHandlers, error) {
 	wire.Build(
 		login.ProviderSet,
 		authorize.Providers,

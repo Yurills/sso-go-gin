@@ -8,6 +8,7 @@ import (
 	"sso-go-gin/pkg/utils/randomutil"
 	"time"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -60,9 +61,9 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 		CreatedDatetime:         time.Now(),
 	}
 
-	if err := s.repository.SaveCSRFToken(ctx, csrfToken, authRequestCode.ID.String(), 5*time.Minute); err != nil {
-		return nil, errors.New(err.Error())
-	}
+	// if err := s.repository.SaveCSRFToken(ctx, csrfToken, authRequestCode.ID.String(), 5*time.Minute); err != nil {
+	// 	return nil, errors.New(err.Error())
+	// }
 	// http.SetCookie(ctx.Writer, &http.Cookie{
 	// 	Name:     "csrf_token",
 	// 	Value:    csrfToken,
@@ -81,6 +82,15 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 		RID:     authRequestCode.ID.String(),
 		CRSFSes: csrfToken,
 	}
+
+	//start the session to store the pending authorization request, for handling interrupt later in login
+	flow_session := sessions.Default(ctx)
+	flow_session.Set("oauth_pending", map[string]string{
+		"client_id": authClient.ID.String(),
+		"redirect_uri": authClient.AuthRedirectCallbackURI,
+		"state": req.State,
+	})
+	flow_session.Save()
 
 	return authorizeResponse, nil
 

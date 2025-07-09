@@ -12,8 +12,8 @@ type Config struct {
 	Password  string
 	Port      string
 	DBName    string
-	RedisHost string
-	RedisPort string
+	// RedisHost string
+	// RedisPort string
 }
 
 var AppConfig *Config
@@ -27,8 +27,8 @@ func Load() *Config {
 		Password:  getEnv("DB_PASSWORD", "12345"),
 		Port:      getEnv("DB_PORT", "5432"),
 		DBName:    getEnv("DB_NAME", "mydatabase"),
-		RedisHost: getEnv("REDIS_HOST", "localhost"),
-		RedisPort: getEnv("REDIS_PORT", "6379"),
+		// RedisHost: getEnv("REDIS_HOST", "localhost"),
+		// RedisPort: getEnv("REDIS_PORT", "6379"),
 	}
 
 	return AppConfig

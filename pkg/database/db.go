@@ -5,7 +5,7 @@ import (
 	"sso-go-gin/config"
 	"sso-go-gin/internal/sso/models"
 
-	"github.com/redis/go-redis/v9"
+	
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -39,8 +39,9 @@ func NewDB(config *config.Config) (*gorm.DB, error) {
 
 }
 
-func NewRedisClient(config *config.Config) *redis.Client {
-	return redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%s", config.RedisHost, config.RedisPort),
-	})
-}
+// func NewRedisClient(config *config.Config) *redis.Client {
+// 	return redis.NewClient(&redis.Options{
+// 		Addr: fmt.Sprintf("%s:%s", config.RedisHost, config.RedisPort),
+// 	})
+// }
+

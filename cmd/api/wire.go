@@ -17,13 +17,15 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/sessions/redis"
+	"github.com/gin-contrib/sessions"
 	"github.com/google/wire"
 )
 
 func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
 	wire.Build(
 		database.NewDB,
-		database.NewRedisClient,
+		// database.NewRedisClient,
 		sso.InitializeSSOHandlers,
 		newRouter,
 	)
@@ -40,6 +42,21 @@ func newRouter(h *sso.SSOHandlers) *gin.Engine {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true, // Important if you're using cookies
 	})))
+
+	store, err := redis.NewStore(10, "tcp", "127.0.0.1:6379", "default", "12345", []byte("secret")) // Replace with your Redis configuration
+	if err != nil {
+		panic(err) // Handle error appropriately in production code
+	}
+	store.Options(sessions.Options{
+		Path: "/",
+		MaxAge: 3600, // Set session expiration time (1 hour)
+		HttpOnly: true, // Prevent JavaScript access to session cookies
+		Secure: true,
+		SameSite: http.SameSiteLaxMode, // Adjust SameSite policy as needed
+	})
+
+	r.Use(sessions.Sessions("sso_session", store))
+
 
 	ssoGroup := r.Group("/api/sso")
 	loginHandler.RegisterRoutes(ssoGroup, h.LoginHandler)

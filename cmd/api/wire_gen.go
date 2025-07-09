@@ -8,6 +8,8 @@ package main
 
 import (
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 	"path/filepath"
 	"sso-go-gin/config"
@@ -27,8 +29,7 @@ func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-	client := database.NewRedisClient(cfg)
-	ssoHandlers, err := sso.InitializeSSOHandlers(cfg, db, client)
+	ssoHandlers, err := sso.InitializeSSOHandlers(cfg, db)
 	if err != nil {
 		return nil, err
 	}
@@ -48,6 +49,12 @@ func newRouter(h *sso.SSOHandlers) *gin.Engine {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	})))
+
+	store, err := redis.NewStore(10, "tcp", "127.0.0.1:6379", "default", "12345", []byte("secret"))
+	if err != nil {
+		panic(err)
+	}
+	r.Use(sessions.Sessions("sso_session", store))
 
 	ssoGroup := r.Group("/api/sso")
 	handler.RegisterRoutes(ssoGroup, h.LoginHandler)

@@ -3,20 +3,18 @@ package repository
 import (
 	"context"
 	"sso-go-gin/internal/sso/models"
-	"time"
 
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
+	
 	"gorm.io/gorm"
 )
 
 type AuthorizeRepository struct {
 	db    *gorm.DB
-	redis *redis.Client // Assuming you have a Redis client defined
 }
 
-func NewAuthorizeRepository(db *gorm.DB, redis *redis.Client) *AuthorizeRepository {
-	return &AuthorizeRepository{db, redis}
+func NewAuthorizeRepository(db *gorm.DB) *AuthorizeRepository {
+	return &AuthorizeRepository{db: db}
 }
 
 func (r *AuthorizeRepository) GetAuthClientByID(c context.Context, client_id string) (*models.AuthClient, error) {
@@ -33,20 +31,20 @@ func (r *AuthorizeRepository) SaveRequestCode(c context.Context, code *models.Au
 	return r.db.WithContext(c).Create(code).Error
 }
 
-func (r *AuthorizeRepository) SaveCSRFToken(c context.Context, csrfToken string, authRequestCodeID string, ttl time.Duration) error {
-	return r.redis.Set(c, csrfToken, authRequestCodeID, ttl).Err()
-}
+// func (r *AuthorizeRepository) SaveCSRFToken(c context.Context, csrfToken string, authRequestCodeID string, ttl time.Duration) error {
+// 	return r.redis.Set(c, csrfToken, authRequestCodeID, ttl).Err()
+// }
 
-func (r *AuthorizeRepository) GetCSRFToken(c context.Context, csrfToken string) (string, error) {
-	val, err := r.redis.Get(c, csrfToken).Result()
-	if err != nil {
-		if err == redis.Nil {
-			return "", nil // Token not found
-		}
-		return "", err // Other error
-	}
-	return val, nil
-}
+// func (r *AuthorizeRepository) GetCSRFToken(c context.Context, csrfToken string) (string, error) {
+// 	val, err := r.redis.Get(c, csrfToken).Result()
+// 	if err != nil {
+// 		if err == redis.Nil {
+// 			return "", nil // Token not found
+// 		}
+// 		return "", err // Other error
+// 	}
+// 	return val, nil
+// }
 
 func (r *AuthorizeRepository) GetSessionByID(c context.Context, sessionID string) (*models.Session, error) {
 	var session models.Session
