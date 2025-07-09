@@ -40,6 +40,10 @@ func (s *Service) Register(c context.Context, req RegisterRequest) (*models.User
 		ID:       uuid.New(), // Assuming GenerateUUID generates a new UUID
 		Username: req.Username,
 		Password: hashedPassword,
+		Email:    req.Email,
+		TwoFAEnabled: false, // Default value
+		ForceResetPassword: false, // Default value
+
 	}
 
 	// Save the user to the database

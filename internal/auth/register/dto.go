@@ -5,6 +5,8 @@ type RegisterRequest struct {
 	// RID 	   string `json:"rid" binding:"required"`
 	Username string `json:"username" form:"usernane" binding:"required"`
 	Password string `json:"password" form:"password" binding:"required"`
+	Email    string `json:"email" form:"email" binding:"required,email"`
+	
 	// CRSFSes string `json:"csrf_ses" binding:"required"`
 }
 

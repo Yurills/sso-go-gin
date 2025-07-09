@@ -14,6 +14,8 @@ type User struct {
 	Username string    `json:"username" gorm:"uniqueIndex;not null"`
 	Password string    `json:"password" gorm:"not null"`
 	Email    string    `json:"email" gorm:"type:varchar(100);uniqueIndex;not null"`
+	TwoFAEnabled bool   `json:"twofa_enabled" gorm:"default:false"`
+	ForceResetPassword bool  `json:"force_reset_password" gorm:"default:false"`
 }
 
 func (User) TableName() string {
@@ -23,6 +25,14 @@ func (User) TableName() string {
 func (u *User) CheckPassword(password string) bool {
 	hash := hashutil.CheckPasswordHash(password, u.Password)
 	return hash
+}
+
+func (u *User) IsPasswordResetRequired() bool {
+	return u.ForceResetPassword
+}
+
+func (u *User) IsTwoFactorEnabled() bool {
+	return u.TwoFAEnabled
 }
 
 type AuthRequestCode struct {

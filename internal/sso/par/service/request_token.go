@@ -51,9 +51,9 @@ func (s *PARService) GetRequestToken(c *gin.Context, req *dtos.PARRequestTokenRe
 		return nil, errors.New("failed to parse or validate token: " + err.Error())
 	}
 
-	sub, ok := claims["sub"].(string)
-	if !ok || sub == "" {
-		return nil, errors.New("subject (sub) claim is missing or invalid in the token")
+	username, ok := claims["preferred_username"].(string)
+	if !ok || username == "" {
+		return nil, errors.New("subject (preferred_username) claim is missing or invalid in the token")
 	}
 
 	authClient2, err := s.repository.GetAuthClientByName(c, req.Destination)
@@ -68,7 +68,7 @@ func (s *PARService) GetRequestToken(c *gin.Context, req *dtos.PARRequestTokenRe
 		Source:          req.Source,
 		Destination:     req.DestinationLink,
 		ExpiredDatetime: time.Now().Add(60 * time.Second), // Set expiration time to 60 seconds
-		User:            sub,
+		User:            username,
 	}
 
 	if err := s.repository.SaveSSOToken(c, sso_token); err != nil {

@@ -78,6 +78,7 @@ func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*Token
 	}
 
 	jwtParams := tokenutil.JWTTokenParams{
+		ID: user.ID.String(),
 		Username: code.Username,
 		Email:    user.Email,
 		Nonce:    auth_request.Nonce,

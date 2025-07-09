@@ -9,6 +9,7 @@ import (
 var jwtSecret = []byte("sso-go-gin-secret")
 
 type JWTTokenParams struct {
+	ID       string
 	Username string
 	Email    string
 	Nonce    *string
@@ -17,10 +18,11 @@ type JWTTokenParams struct {
 
 func GenerateJWTToken(params JWTTokenParams) (string, error) {
 	claims := jwt.MapClaims{
-		"sub":   params.Username,
-		"iat":   time.Now().Unix(),
-		"exp":   time.Now().Add(time.Second * time.Duration(params.TTL)).Unix(), // Token valid for 24 hours
-		"email": params.Email,
+		"sub":                params.ID,
+		"iat":                time.Now().Unix(),
+		"exp":                time.Now().Add(time.Second * time.Duration(params.TTL)).Unix(), // Token valid for 24 hours
+		"email":              params.Email,
+		"preferred_username": params.Username,
 	}
 	if params.Nonce != nil {
 		claims["nonce"] = *params.Nonce

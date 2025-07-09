@@ -43,6 +43,7 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 	if !user.CheckPassword(req.Password) {
 		return nil, errors.New("wrong password")
 	}
+	
 
 	//check csrf token
 	csrfCookie, err := ctx.Request.Cookie("csrf_token")
@@ -54,6 +55,15 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 	if csrfHeader != csrfCookie.Value {
 		return nil, errors.New("invalid CSRF token")
 	}
+
+	//check if user need 2FA or password-reset (break the login flow if needed)
+	if user.IsTwoFactorEnabled() || user.IsPasswordResetRequired() {
+		
+	}
+
+
+
+
 
 	//generate auth code and insert into database
 	authCode, err := randomutil.GenerateRandomString(32) // Generate a random auth code
