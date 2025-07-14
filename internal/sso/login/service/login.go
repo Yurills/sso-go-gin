@@ -46,7 +46,6 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 	if !user.CheckPassword(req.Password) {
 		return nil, errors.New("wrong password")
 	}
-	
 
 	//check csrf token
 	csrfCookie, err := ctx.Request.Cookie("csrf_token")
@@ -65,7 +64,6 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 		// If 2FA is enabled, redirect to 2FA verification page
 		flow_session.Set("login_state", "2fa_required")
 		flow_session.Save()
-		ctx.Redirect(302, "/2fa")
 		return nil, errors.New("2FA required")
 	}
 
@@ -120,13 +118,9 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 	//all clear, set session state to logged in
 	flow_session.Set("user_id", user.ID.String())
 	flow_session.Delete("temp_user_id") // Clear temporary user ID
-	flow_session.Delete("login_state") // Clear login state
+	flow_session.Delete("login_state")  // Clear login state
 	flow_session.Save()
-
 
 	return loginResponse, nil
 
 }
-
-
-

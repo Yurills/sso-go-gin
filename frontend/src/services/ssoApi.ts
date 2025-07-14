@@ -71,6 +71,8 @@ export const ssoApi = {
         body: JSON.stringify(params),
       });
       return await response.json();
+
+      
     } catch (error) {
       console.error('Login API error:', error);
       return {redirect_uri: '', error: 'Network error' };
