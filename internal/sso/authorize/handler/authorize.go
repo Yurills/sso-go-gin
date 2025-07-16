@@ -52,6 +52,10 @@ func (h *AuthorizeHandler) GetAuthorize(c *gin.Context) {
 	if res.Nonce != nil && *res.Nonce != "" {
 		callbackurl += "&nonce=" + *res.Nonce
 	}
+
+	
+
+
 	c.Redirect(http.StatusFound, callbackurl)
 
 }

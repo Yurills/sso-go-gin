@@ -53,6 +53,11 @@ export const LoginForm = ({ clientApp, redirectUri, state, scope, responseType }
 
       console.log('Attempting login with API:', loginRequest);
       const response = await ssoApi.login(loginRequest);
+
+      if (response.redirect_uri) {
+        window.location.href = response.redirect_uri;
+        return;
+      }
       
       if (response.code) {
         toast({

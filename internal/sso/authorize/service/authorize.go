@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"sso-go-gin/internal/sso/authorize/dtos"
 	"sso-go-gin/internal/sso/authorize/repository"
@@ -8,6 +9,7 @@ import (
 	"sso-go-gin/pkg/utils/randomutil"
 	"time"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -60,9 +62,9 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 		CreatedDatetime:         time.Now(),
 	}
 
-	if err := s.repository.SaveCSRFToken(ctx, csrfToken, authRequestCode.ID.String(), 5*time.Minute); err != nil {
-		return nil, errors.New(err.Error())
-	}
+	// if err := s.repository.SaveCSRFToken(ctx, csrfToken, authRequestCode.ID.String(), 5*time.Minute); err != nil {
+	// 	return nil, errors.New(err.Error())
+	// }
 	// http.SetCookie(ctx.Writer, &http.Cookie{
 	// 	Name:     "csrf_token",
 	// 	Value:    csrfToken,
@@ -81,6 +83,20 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 		RID:     authRequestCode.ID.String(),
 		CRSFSes: csrfToken,
 	}
+
+	//start the session to store the pending authorization request, for handling interrupt later in login
+	flow_session := sessions.Default(ctx)
+	
+	pending := models.OAuthPending{
+		ClientID:       authClient.ClientID,
+		RedirectURI:    authClient.AuthRedirectCallbackURI,
+		State:          req.State,
+		RID:            authRequestCode.ID.String(),
+	}
+
+	jsonStr, _ := json.Marshal(pending)
+	flow_session.Set("oauth_pending", string(jsonStr)) // Store pending authorization request in session
+	flow_session.Save()
 
 	return authorizeResponse, nil
 
