@@ -69,6 +69,7 @@ export const ssoApi = {
           'X-csrf_token': params.csrf_ses || '',
         },
         body: JSON.stringify(params),
+        credentials: 'include', // Include cookies for session management
       });
       return await response.json();
 
@@ -106,4 +107,29 @@ export const ssoApi = {
   //     throw new Error('Failed to get user info');
   //   }
   // }
+
+
+  continue_login: async (): Promise<LoginResponse> => {
+    try {
+      const response = await fetch(`/api/sso/login/continue`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-csrf_token': getCSRFTokenFromCookie() || '',
+        },
+        credentials: 'include', // Include cookies for session management
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Continue Login API error:', error);
+      return { redirect_uri: '', error: 'Network error' };
+    }
+  }
 };
+
+
+function getCSRFTokenFromCookie() {
+  const match = document.cookie.match(/csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+

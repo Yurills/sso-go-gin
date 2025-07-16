@@ -14,6 +14,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	
 )
 
 type LoginService struct {
@@ -58,12 +59,14 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 		return nil, errors.New("invalid CSRF token")
 	}
 
-	flow_session.Set("temp_user_id", user.ID.String())
+	flow_session.Set("temp_user_id", user.ID.String()) // Temporarily store user ID in session
+	flow_session.Set("temp_username", user.Username) // Temporarily store username in session
 	//check if user need 2FA or password-reset (break the login flow if needed)
 	if user.IsTwoFactorEnabled() {
 		// If 2FA is enabled, redirect to 2FA verification page
 		flow_session.Set("login_state", "2fa_required")
 		flow_session.Save()
+		print("session state set:" + flow_session.Get("login_state").(string))
 		return nil, errors.New("2FA required")
 	}
 
@@ -119,6 +122,8 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 	flow_session.Set("user_id", user.ID.String())
 	flow_session.Delete("temp_user_id") // Clear temporary user ID
 	flow_session.Delete("login_state")  // Clear login state
+	flow_session.Delete("temp_username") // Clear temporary username
+	flow_session.Delete("oauth_pending") // Clear any pending OAuth state
 	flow_session.Save()
 
 	return loginResponse, nil

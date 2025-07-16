@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"sso-go-gin/internal/sso/authorize/dtos"
 	"sso-go-gin/internal/sso/authorize/repository"
@@ -85,11 +86,16 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 
 	//start the session to store the pending authorization request, for handling interrupt later in login
 	flow_session := sessions.Default(ctx)
-	flow_session.Set("oauth_pending", map[string]string{
-		"client_id": authClient.ID.String(),
-		"redirect_uri": authClient.AuthRedirectCallbackURI,
-		"state": req.State,
-	})
+	
+	pending := models.OAuthPending{
+		ClientID:       authClient.ClientID,
+		RedirectURI:    authClient.AuthRedirectCallbackURI,
+		State:          req.State,
+		RID:            authRequestCode.ID.String(),
+	}
+
+	jsonStr, _ := json.Marshal(pending)
+	flow_session.Set("oauth_pending", string(jsonStr)) // Store pending authorization request in session
 	flow_session.Save()
 
 	return authorizeResponse, nil

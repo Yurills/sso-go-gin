@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"sso-go-gin/internal/sso/login/dtos"
@@ -13,23 +14,30 @@ import (
 	"github.com/google/uuid"
 )
 
-//in the case flow get interrupt by 2FA or password reset, we continue after getting sendback to here.
+// in the case flow get interrupt by 2FA or password reset, we continue after getting sendback to here.
 func (s *LoginService) ContinueLogin(ctx *gin.Context) (*dtos.LoginResponse, error) {
 	flow_session := sessions.Default(ctx)
-	userID := flow_session.Get("user_id")
+	userID := flow_session.Get("temp_user_id")
 	if userID == nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return nil, errors.New("unauthorized")
 	}
 
 	// Continue the login process (e.g., verify 2FA code)
+	println("Continuing login for user ID: " + userID.(string))
+	println("Session state: " + flow_session.Get("login_state").(string))
+
 	oauth := flow_session.Get("oauth_pending")
 	if oauth == nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "no oauth pending"})
 		return nil, errors.New("no oauth pending")
 	}
-
-	oauthMap := oauth.(map[string]string)
+	println(oauth.(string))
+	var oauthMap map[string]string
+	if err := json.Unmarshal([]byte(oauth.(string)), &oauthMap); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse oauth pending data"})
+		return nil, err
+	}
 
 	//generate auth code
 	authCode, err := randomutil.GenerateRandomString(32) // Generate a random auth code
@@ -44,7 +52,7 @@ func (s *LoginService) ContinueLogin(ctx *gin.Context) (*dtos.LoginResponse, err
 		Type:            "code",
 		ExpiredDatetime: time.Now().Add(24 * time.Hour), // Set expiration time
 		CreatedDatetime: time.Now(),
-		Username:        flow_session.Get("temp_user_id").(string), // Use temporary user ID
+		Username:        flow_session.Get("temp_username").(string), // Use temporary username
 	}
 	if err := s.repository.SaveAuthCode(ctx, authCodeRecord); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save auth code"})
@@ -77,10 +85,14 @@ func (s *LoginService) ContinueLogin(ctx *gin.Context) (*dtos.LoginResponse, err
 		RedirectURI: oauthMap["redirect_uri"],
 		State:       oauthMap["state"],
 	}
-	
+
 	// Clear session data
+	flow_session.Set("user_id", userID.(string)) // Set the user ID in the session
+	flow_session.Delete("temp_user_id")          // Clear temporary user ID
+	flow_session.Delete("temp_username")         // Clear temporary username
+	flow_session.Delete("login_state")           // Clear login state
 	flow_session.Delete("oauth_pending")
-	ctx.JSON(http.StatusOK, LoginResponse)
+	// ctx.JSON(http.StatusOK, LoginResponse)
 	return LoginResponse, nil
 
 }

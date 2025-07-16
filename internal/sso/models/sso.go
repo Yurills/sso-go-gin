@@ -10,12 +10,12 @@ import (
 )
 
 type User struct {
-	ID       uuid.UUID `json:"id" gorm:"primaryKey;"`
-	Username string    `json:"username" gorm:"uniqueIndex;not null"`
-	Password string    `json:"password" gorm:"not null"`
-	Email    string    `json:"email" gorm:"type:varchar(100);uniqueIndex;not null"`
-	TwoFAEnabled bool   `json:"twofa_enabled" gorm:"default:false"`
-	ForceResetPassword bool  `json:"force_reset_password" gorm:"default:false"`
+	ID                 uuid.UUID `json:"id" gorm:"primaryKey;"`
+	Username           string    `json:"username" gorm:"uniqueIndex;not null"`
+	Password           string    `json:"password" gorm:"not null"`
+	Email              string    `json:"email" gorm:"type:varchar(100);uniqueIndex;not null"`
+	TwoFAEnabled       bool      `json:"twofa_enabled" gorm:"default:false"`
+	ForceResetPassword bool      `json:"force_reset_password" gorm:"default:false"`
 }
 
 func (User) TableName() string {
@@ -146,4 +146,11 @@ type RefreshToken struct {
 func (a *RefreshToken) IsExpired() bool {
 	return time.Now().After(a.ExpiredDatetime)
 	// return false //for testing purposes
+}
+
+type OAuthPending struct {
+	ClientID    string `json:"client_id" gorm:"type:varchar(100);not null"`
+	RedirectURI string `json:"redirect_uri" gorm:"type:varchar(255);not null"`
+	State       string `json:"state" gorm:"type:varchar(40);not null"`
+	RID         string `json:"rid" gorm:"type:varchar(40);not null"` // Request ID for tracking
 }
