@@ -62,12 +62,12 @@ func (a *AuthRequestCode) BeforeCreate(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (a *AuthRequestCode) AfterCreate(tx *gorm.DB) (err error) {
-	if a.Nonce != nil && *a.Nonce == "" {
-		a.Nonce = nil
-	}
-	return nil
-}
+// func (a *AuthRequestCode) AfterCreate(tx *gorm.DB) (err error) {
+// 	if a.Nonce != nil && *a.Nonce == "" {
+// 		a.Nonce = nil
+// 	}
+// 	return nil
+// }
 
 type AuthCode struct {
 	ID              uuid.UUID `json:"id" gorm:"type:uuid;primaryKey;"`
