@@ -33,7 +33,7 @@ export const LoginForm = ({ clientApp, redirectUri, state, scope, responseType }
 
 
   function getCSRFTokenFromCookie() {
-    const match = document.cookie.match(/csrf_token=([^;]+)/);
+    const match = RegExp(/csrf_token=([^;]+)/).exec(document.cookie);
     return match ? decodeURIComponent(match[1]) : null;
   }
 

@@ -30,6 +30,39 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
 
+  sonarqube:
+    image: sonarqube:latest
+    hostname: sonarqube
+    container_name: sonarqube
+    depends_on:
+      - sonarqube-db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensins:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/sonarqube_logs
+    ports:
+      - "9000:9000"
+  sonarqube-db:
+    image: postgres:latest
+    hostname: sonarqube-db
+    container_name: sonarqube-db
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar
+    volumes:
+      - sonarqube_db_data:/var/lib/postgresql/data
+      - sonarqube_db:/var/lib/postgresql/data
+
 volumes:
   db-data:
   pgadmin-data:
+  sonarqube_data:
+  sonarqube_extensins:
+  sonarqube_logs:
+  sonarqube_db_data:
+  sonarqube_db:

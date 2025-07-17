@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { SSOConfig } from "@/components/auth/SSOConfig";
+
 import { Shield, Users, Zap } from "lucide-react";
 
 const Index = () => {
