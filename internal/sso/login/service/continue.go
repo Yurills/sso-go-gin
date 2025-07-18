@@ -23,7 +23,7 @@ func (s *LoginService) ContinueLogin(ctx *gin.Context) (*dtos.LoginResponse, err
 		return nil, errors.New("unauthorized")
 	}
 
-	// Continue the login process (e.g., verify 2FA code)
+	// Continue the login process (e.g. verify 2FA code)
 	println("Continuing login for user ID: " + userID.(string))
 	println("Session state: " + flow_session.Get("login_state").(string))
 
@@ -60,6 +60,7 @@ func (s *LoginService) ContinueLogin(ctx *gin.Context) (*dtos.LoginResponse, err
 	}
 
 	//save session
+	
 	sessionID := uuid.New().String()
 	http.SetCookie(ctx.Writer, &http.Cookie{
 		Name:     "session_id",
@@ -87,10 +88,10 @@ func (s *LoginService) ContinueLogin(ctx *gin.Context) (*dtos.LoginResponse, err
 	}
 
 	// Clear session data
-	flow_session.Set("user_id", userID.(string)) // Set the user ID in the session
-	flow_session.Delete("temp_user_id")          // Clear temporary user ID
-	flow_session.Delete("temp_username")         // Clear temporary username
-	flow_session.Delete("login_state")           // Clear login state
+	flow_session.Set("user_id", userID.(string))
+	flow_session.Delete("temp_user_id")          
+	flow_session.Delete("temp_username")         
+	flow_session.Delete("login_state")           
 	flow_session.Delete("oauth_pending")
 	// ctx.JSON(http.StatusOK, LoginResponse)
 	return LoginResponse, nil

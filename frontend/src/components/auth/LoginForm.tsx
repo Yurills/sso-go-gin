@@ -54,9 +54,9 @@ export const LoginForm = ({ clientApp, redirectUri, state, scope, responseType }
       console.log('Attempting login with API:', loginRequest);
       const response = await ssoApi.login(loginRequest);
 
-      if (response.redirect_uri) {
-        window.location.href = response.redirect_uri;
-        return;
+      if (response.redirect_uri && !response.code) { //handle normal redirect or redirect with code (2FA or continue login)
+          window.location.href = response.redirect_uri;
+          return;
       }
       
       if (response.code) {

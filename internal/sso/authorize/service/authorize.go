@@ -86,12 +86,12 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 
 	//start the session to store the pending authorization request, for handling interrupt later in login
 	flow_session := sessions.Default(ctx)
-	
+
 	pending := models.OAuthPending{
-		ClientID:       authClient.ClientID,
-		RedirectURI:    authClient.AuthRedirectCallbackURI,
-		State:          req.State,
-		RID:            authRequestCode.ID.String(),
+		ClientID:    authClient.ClientID,
+		RedirectURI: authClient.AuthRedirectCallbackURI,
+		State:       req.State,
+		RID:         authRequestCode.ID.String(),
 	}
 
 	jsonStr, _ := json.Marshal(pending)
