@@ -11,11 +11,13 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"path/filepath"
 	"sso-go-gin/config"
 	"sso-go-gin/internal/sso"
 	handler2 "sso-go-gin/internal/sso/authorize/handler"
 	"sso-go-gin/internal/sso/login/handler"
+	"sso-go-gin/internal/sso/logout"
 	handler3 "sso-go-gin/internal/sso/par/handler"
 	"sso-go-gin/internal/sso/token"
 	"sso-go-gin/pkg/database"
@@ -54,6 +56,14 @@ func newRouter(h *sso.SSOHandlers) *gin.Engine {
 	if err != nil {
 		panic(err)
 	}
+	store.Options(sessions.Options{
+		Path:     "/",
+		MaxAge:   3600,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
 	r.Use(sessions.Sessions("sso_session", store))
 
 	ssoGroup := r.Group("/api/sso")
@@ -61,6 +71,7 @@ func newRouter(h *sso.SSOHandlers) *gin.Engine {
 	handler2.RegisterRoutes(ssoGroup, h.AuthorizeHandler)
 	token.RegisterRoutes(ssoGroup, h.TokenHandler)
 	handler3.RegisterRoutes(ssoGroup, h.PARHandler)
+	logout.RegisterRoutes(ssoGroup, h.LogoutHandler)
 
 	staticDir := "./frontend/dist"
 	r.Static("/assets", filepath.Join(staticDir, "assets"))

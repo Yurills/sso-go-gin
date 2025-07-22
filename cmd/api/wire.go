@@ -4,11 +4,13 @@
 package main
 
 import (
+	"net/http"
 	"path/filepath"
 	"sso-go-gin/config"
 	"sso-go-gin/internal/sso"
 	authorizeHandler "sso-go-gin/internal/sso/authorize/handler"
 	loginHandler "sso-go-gin/internal/sso/login/handler"
+	"sso-go-gin/internal/sso/logout"
 	parHandler "sso-go-gin/internal/sso/par/handler"
 	tokenHandler "sso-go-gin/internal/sso/token"
 	"strings"
@@ -16,9 +18,9 @@ import (
 	"sso-go-gin/pkg/database"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/redis"
+	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
@@ -48,21 +50,21 @@ func newRouter(h *sso.SSOHandlers) *gin.Engine {
 		panic(err) // Handle error appropriately in production code
 	}
 	store.Options(sessions.Options{
-		Path: "/",
-		MaxAge: 3600, // Set session expiration time (1 hour)
+		Path:     "/",
+		MaxAge:   3600, // Set session expiration time (1 hour)
 		HttpOnly: true, // Prevent JavaScript access to session cookies
-		Secure: true,
+		Secure:   true,
 		SameSite: http.SameSiteLaxMode, // Adjust SameSite policy as needed
 	})
 
 	r.Use(sessions.Sessions("sso_session", store))
-
 
 	ssoGroup := r.Group("/api/sso")
 	loginHandler.RegisterRoutes(ssoGroup, h.LoginHandler)
 	authorizeHandler.RegisterRoutes(ssoGroup, h.AuthorizeHandler)
 	tokenHandler.RegisterRoutes(ssoGroup, h.TokenHandler)
 	parHandler.RegisterRoutes(ssoGroup, h.PARHandler)
+	logout.RegisterRoutes(ssoGroup, h.LogoutHandler)
 
 	staticDir := "./frontend/dist"
 	r.Static("/assets", filepath.Join(staticDir, "assets"))

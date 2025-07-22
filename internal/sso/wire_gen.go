@@ -15,6 +15,7 @@ import (
 	"sso-go-gin/internal/sso/login/handler"
 	"sso-go-gin/internal/sso/login/repository"
 	"sso-go-gin/internal/sso/login/service"
+	"sso-go-gin/internal/sso/logout"
 	handler3 "sso-go-gin/internal/sso/par/handler"
 	repository3 "sso-go-gin/internal/sso/par/repository"
 	service3 "sso-go-gin/internal/sso/par/service"
@@ -36,11 +37,15 @@ func InitializeSSOHandlers(cfg *config.Config, db *gorm.DB) (*SSOHandlers, error
 	parRepository := repository3.NewPARRepository(db)
 	parService := service3.NewPARService(parRepository)
 	parHandler := handler3.NewPARHandler(parService)
+	logoutRepository := logout.NewLogoutRepository(db)
+	logoutService := logout.NewLogoutService(logoutRepository)
+	logoutHandler := logout.NewLogoutHandler(logoutService)
 	ssoHandlers := &SSOHandlers{
 		LoginHandler:     loginHandler,
 		AuthorizeHandler: authorizeHandler,
 		TokenHandler:     tokenHandler,
 		PARHandler:       parHandler,
+		LogoutHandler:    logoutHandler,
 	}
 	return ssoHandlers, nil
 }
@@ -52,4 +57,5 @@ type SSOHandlers struct {
 	AuthorizeHandler *handler2.AuthorizeHandler
 	TokenHandler     *token.TokenHandler
 	PARHandler       *handler3.PARHandler
+	LogoutHandler    *logout.LogoutHandler
 }

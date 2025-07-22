@@ -13,9 +13,10 @@ import (
 
 	"sso-go-gin/internal/sso/authorize"
 	"sso-go-gin/internal/sso/login"
+	"sso-go-gin/internal/sso/logout"
 
 	"github.com/google/wire"
-	
+
 	"gorm.io/gorm"
 )
 
@@ -24,6 +25,7 @@ type SSOHandlers struct {
 	AuthorizeHandler *authorizeHandler.AuthorizeHandler
 	TokenHandler     *token.TokenHandler
 	PARHandler       *PARHandler.PARHandler
+	LogoutHandler    *logout.LogoutHandler
 }
 
 func InitializeSSOHandlers(cfg *config.Config, db *gorm.DB) (*SSOHandlers, error) {
@@ -32,6 +34,7 @@ func InitializeSSOHandlers(cfg *config.Config, db *gorm.DB) (*SSOHandlers, error
 		authorize.Providers,
 		token.ProviderSet,
 		par.ProviderSet,
+		logout.ProviderSet,
 		wire.Struct(new(SSOHandlers), "*"),
 	)
 	return nil, nil
