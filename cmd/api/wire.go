@@ -7,12 +7,17 @@ import (
 	"net/http"
 	"path/filepath"
 	"sso-go-gin/config"
+	"sso-go-gin/internal/admin"
+	"sso-go-gin/internal/middleware"
 	"sso-go-gin/internal/sso"
 	authorizeHandler "sso-go-gin/internal/sso/authorize/handler"
 	loginHandler "sso-go-gin/internal/sso/login/handler"
 	"sso-go-gin/internal/sso/logout"
 	parHandler "sso-go-gin/internal/sso/par/handler"
 	tokenHandler "sso-go-gin/internal/sso/token"
+
+	registerHandler "sso-go-gin/internal/admin/register_client/handler"
+
 	"strings"
 
 	"sso-go-gin/pkg/database"
@@ -29,12 +34,17 @@ func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
 		database.NewDB,
 		// database.NewRedisClient,
 		sso.InitializeSSOHandlers,
+		admin.InitializeAdminHandlers,
+		middleware.InitializeMiddlewares,
 		newRouter,
 	)
 	return nil, nil
 }
 
-func newRouter(h *sso.SSOHandlers) *gin.Engine {
+func newRouter(
+	h *sso.SSOHandlers,
+	adminHandler *admin.AdminHandlers,
+	middleware *middleware.Middlewares) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New((cors.Config{
@@ -65,6 +75,9 @@ func newRouter(h *sso.SSOHandlers) *gin.Engine {
 	tokenHandler.RegisterRoutes(ssoGroup, h.TokenHandler)
 	parHandler.RegisterRoutes(ssoGroup, h.PARHandler)
 	logout.RegisterRoutes(ssoGroup, h.LogoutHandler)
+
+	adminGroup := r.Group("/api/admin", middleware.AdminOnlyMiddleware.AdminOnlyMiddleware())
+	registerHandler.RegisterRoutes(adminGroup, adminHandler.RegisterHandler)
 
 	staticDir := "./frontend/dist"
 	r.Static("/assets", filepath.Join(staticDir, "assets"))

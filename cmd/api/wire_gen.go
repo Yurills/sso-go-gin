@@ -14,6 +14,9 @@ import (
 	"net/http"
 	"path/filepath"
 	"sso-go-gin/config"
+	"sso-go-gin/internal/admin"
+	handler4 "sso-go-gin/internal/admin/register_client/handler"
+	"sso-go-gin/internal/middleware"
 	"sso-go-gin/internal/sso"
 	handler2 "sso-go-gin/internal/sso/authorize/handler"
 	"sso-go-gin/internal/sso/login/handler"
@@ -35,13 +38,20 @@ func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-	engine := newRouter(ssoHandlers)
+	adminHandlers, err := admin.InitializeAdminHandlers(cfg, db)
+	if err != nil {
+		return nil, err
+	}
+	middlewares := middleware.InitializeMiddlewares(cfg, db)
+	engine := newRouter(ssoHandlers, adminHandlers, middlewares)
 	return engine, nil
 }
 
 // wire.go:
 
-func newRouter(h *sso.SSOHandlers) *gin.Engine {
+func newRouter(
+	h *sso.SSOHandlers,
+	adminHandler *admin.AdminHandlers, middleware2 *middleware.Middlewares) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New((cors.Config{
@@ -72,6 +82,9 @@ func newRouter(h *sso.SSOHandlers) *gin.Engine {
 	token.RegisterRoutes(ssoGroup, h.TokenHandler)
 	handler3.RegisterRoutes(ssoGroup, h.PARHandler)
 	logout.RegisterRoutes(ssoGroup, h.LogoutHandler)
+
+	adminGroup := r.Group("/api/admin", middleware2.AdminOnlyMiddleware.AdminOnlyMiddleware())
+	handler4.RegisterRoutes(adminGroup, adminHandler.RegisterHandler)
 
 	staticDir := "./frontend/dist"
 	r.Static("/assets", filepath.Join(staticDir, "assets"))
