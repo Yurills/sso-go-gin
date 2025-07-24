@@ -9,6 +9,8 @@ import { ClipboardCopyIcon } from "lucide-react";
 const RegisterAuthClient = () => {
   const [form, setForm] = useState({
     name: "",
+    client_id: "",
+    client_secret: "",
     description: "",
     auth_redirect_callback_uri: "",
     sso_redirect_callback_uri: "",
@@ -18,11 +20,6 @@ const RegisterAuthClient = () => {
     private_key: "",
     public_key: "",
   });
-
-  const [generated, setGenerated] = useState<null | {
-    client_id: string;
-    client_secret: string;
-  }>(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -45,7 +42,7 @@ const RegisterAuthClient = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/admin/auth-clients", {
+      const res = await fetch("/api/admin/register-client", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -53,14 +50,10 @@ const RegisterAuthClient = () => {
 
       if (!res.ok) throw new Error("Registration failed");
 
-      const data = await res.json(); // Expecting: { client_id, client_secret }
-      setGenerated({
-        client_id: data.client_id,
-        client_secret: data.client_secret,
-      });
-
       setForm({
         name: "",
+        client_id: "",
+        client_secret: "",
         description: "",
         auth_redirect_callback_uri: "",
         sso_redirect_callback_uri: "",
@@ -89,7 +82,7 @@ const RegisterAuthClient = () => {
         </h1>
 
         {/* Admin-typed fields */}
-        {["name", "description", "auth_redirect_callback_uri", "sso_redirect_callback_uri", "scope"].map(field => (
+        {["name", "client_id","client_secret","description", "auth_redirect_callback_uri", "sso_redirect_callback_uri", "scope"].map(field => (
           <div key={field}>
             <Label htmlFor={field}>{field.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</Label>
             <Input name={field} value={(form as any)[field]} onChange={handleChange} required={field !== "scope"} />
@@ -124,7 +117,7 @@ const RegisterAuthClient = () => {
         </Button>
 
         {/* Display generated credentials */}
-        {generated && (
+        {/* {generated && (
           <div className="mt-6 bg-gray-100 rounded-lg p-4 border text-sm">
             <p className="mb-2 font-medium text-gray-700">🎉 Client registered successfully!</p>
             <p className="text-red-600 font-semibold">⚠️ Please save these credentials. You won’t see them again.</p>
@@ -143,7 +136,7 @@ const RegisterAuthClient = () => {
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </form>
     </div>
   );

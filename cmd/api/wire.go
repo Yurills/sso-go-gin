@@ -4,21 +4,27 @@
 package main
 
 import (
+	"net/http"
 	"path/filepath"
 	"sso-go-gin/config"
+	"sso-go-gin/internal/admin"
+	"sso-go-gin/internal/middleware"
 	"sso-go-gin/internal/sso"
 	authorizeHandler "sso-go-gin/internal/sso/authorize/handler"
 	loginHandler "sso-go-gin/internal/sso/login/handler"
 	parHandler "sso-go-gin/internal/sso/par/handler"
 	tokenHandler "sso-go-gin/internal/sso/token"
+
+	registerHandler "sso-go-gin/internal/admin/register_client/handler"
+
 	"strings"
 
 	"sso-go-gin/pkg/database"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/redis"
+	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
@@ -27,12 +33,17 @@ func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
 		database.NewDB,
 		// database.NewRedisClient,
 		sso.InitializeSSOHandlers,
+		admin.InitializeAdminHandlers,
+		middleware.InitializeMiddlewares,
 		newRouter,
 	)
 	return nil, nil
 }
 
-func newRouter(h *sso.SSOHandlers) *gin.Engine {
+func newRouter(
+	h *sso.SSOHandlers,
+	adminHandler *admin.AdminHandlers,
+	middleware *middleware.Middlewares) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New((cors.Config{
@@ -48,21 +59,23 @@ func newRouter(h *sso.SSOHandlers) *gin.Engine {
 		panic(err) // Handle error appropriately in production code
 	}
 	store.Options(sessions.Options{
-		Path: "/",
-		MaxAge: 3600, // Set session expiration time (1 hour)
+		Path:     "/",
+		MaxAge:   3600, // Set session expiration time (1 hour)
 		HttpOnly: true, // Prevent JavaScript access to session cookies
-		Secure: true,
+		Secure:   true,
 		SameSite: http.SameSiteLaxMode, // Adjust SameSite policy as needed
 	})
 
 	r.Use(sessions.Sessions("sso_session", store))
-
 
 	ssoGroup := r.Group("/api/sso")
 	loginHandler.RegisterRoutes(ssoGroup, h.LoginHandler)
 	authorizeHandler.RegisterRoutes(ssoGroup, h.AuthorizeHandler)
 	tokenHandler.RegisterRoutes(ssoGroup, h.TokenHandler)
 	parHandler.RegisterRoutes(ssoGroup, h.PARHandler)
+
+	adminGroup := r.Group("/api/admin", middleware.AdminOnlyMiddleware.AdminOnlyMiddleware())
+	registerHandler.RegisterRoutes(adminGroup, adminHandler.RegisterHandler)
 
 	staticDir := "./frontend/dist"
 	r.Static("/assets", filepath.Join(staticDir, "assets"))

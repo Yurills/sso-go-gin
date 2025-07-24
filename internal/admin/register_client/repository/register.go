@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"sso-go-gin/internal/client/models"
+	"sso-go-gin/internal/admin/models"
 
 	"gorm.io/gorm"
 )

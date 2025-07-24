@@ -11,8 +11,12 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"path/filepath"
 	"sso-go-gin/config"
+	"sso-go-gin/internal/admin"
+	handler4 "sso-go-gin/internal/admin/register_client/handler"
+	"sso-go-gin/internal/middleware"
 	"sso-go-gin/internal/sso"
 	handler2 "sso-go-gin/internal/sso/authorize/handler"
 	"sso-go-gin/internal/sso/login/handler"
@@ -33,13 +37,20 @@ func InitializeApp(cfg *config.Config) (*gin.Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-	engine := newRouter(ssoHandlers)
+	adminHandlers, err := admin.InitializeAdminHandlers(cfg, db)
+	if err != nil {
+		return nil, err
+	}
+	middlewares := middleware.InitializeMiddlewares(cfg, db)
+	engine := newRouter(ssoHandlers, adminHandlers, middlewares)
 	return engine, nil
 }
 
 // wire.go:
 
-func newRouter(h *sso.SSOHandlers) *gin.Engine {
+func newRouter(
+	h *sso.SSOHandlers,
+	adminHandler *admin.AdminHandlers, middleware2 *middleware.Middlewares) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New((cors.Config{
@@ -54,6 +65,14 @@ func newRouter(h *sso.SSOHandlers) *gin.Engine {
 	if err != nil {
 		panic(err)
 	}
+	store.Options(sessions.Options{
+		Path:     "/",
+		MaxAge:   3600,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
 	r.Use(sessions.Sessions("sso_session", store))
 
 	ssoGroup := r.Group("/api/sso")
@@ -61,6 +80,9 @@ func newRouter(h *sso.SSOHandlers) *gin.Engine {
 	handler2.RegisterRoutes(ssoGroup, h.AuthorizeHandler)
 	token.RegisterRoutes(ssoGroup, h.TokenHandler)
 	handler3.RegisterRoutes(ssoGroup, h.PARHandler)
+
+	adminGroup := r.Group("/api/admin", middleware2.AdminOnlyMiddleware.AdminOnlyMiddleware())
+	handler4.RegisterRoutes(adminGroup, adminHandler.RegisterHandler)
 
 	staticDir := "./frontend/dist"
 	r.Static("/assets", filepath.Join(staticDir, "assets"))

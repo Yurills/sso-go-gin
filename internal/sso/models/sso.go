@@ -16,6 +16,7 @@ type User struct {
 	Email              string    `json:"email" gorm:"type:varchar(100);uniqueIndex;not null"`
 	TwoFAEnabled       bool      `json:"twofa_enabled" gorm:"default:false"`
 	ForceResetPassword bool      `json:"force_reset_password" gorm:"default:false"`
+	Role 			string    `json:"role" gorm:"type:varchar(20);not null;default:'user'"`
 }
 
 func (User) TableName() string {
