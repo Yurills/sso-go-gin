@@ -1,6 +1,10 @@
 package policy
 
-import "github.com/gin-gonic/gin"
+import (
+	"strings"
+
+	"github.com/gin-gonic/gin"
+)
 
 func AddSecurityPolicyMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -35,6 +39,17 @@ func AddSecurityHeadersMiddleware() gin.HandlerFunc {
 		c.Header("X-XSS-Protection", "1; mode=block")
 		c.Header("Referrer-Policy", "no-referrer-when-downgrade")
 		c.Header("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
+
+		c.Next()
+	}
+}
+
+func RejectSuspiciousEndpointsMiddleware() gin.HandlerFunc { //reject BitKeeper endpoint, suggested from ZAP scanner
+	return func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, "/BitKeeper") {
+			c.AbortWithStatus(403)
+			return
+		}
 
 		c.Next()
 	}

@@ -16,8 +16,8 @@ import (
 
 // in the case flow get interrupt by 2FA or password reset, we continue after getting sendback to here.
 func (s *LoginService) ContinueLogin(ctx *gin.Context) (*dtos.LoginResponse, error) {
-	flow_session := sessions.Default(ctx)
-	userID := flow_session.Get("temp_user_id")
+	flowSession := sessions.Default(ctx)
+	userID := flowSession.Get("temp_user_id")
 	if userID == nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return nil, errors.New("unauthorized")
@@ -25,9 +25,9 @@ func (s *LoginService) ContinueLogin(ctx *gin.Context) (*dtos.LoginResponse, err
 
 	// Continue the login process (e.g. verify 2FA code)
 	println("Continuing login for user ID: " + userID.(string))
-	println("Session state: " + flow_session.Get("login_state").(string))
+	println("Session state: " + flowSession.Get("login_state").(string))
 
-	oauth := flow_session.Get("oauth_pending")
+	oauth := flowSession.Get("oauth_pending")
 	if oauth == nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "no oauth pending"})
 		return nil, errors.New("no oauth pending")
@@ -52,7 +52,7 @@ func (s *LoginService) ContinueLogin(ctx *gin.Context) (*dtos.LoginResponse, err
 		Type:            "code",
 		ExpiredDatetime: time.Now().Add(24 * time.Hour), // Set expiration time
 		CreatedDatetime: time.Now(),
-		Username:        flow_session.Get("temp_username").(string), // Use temporary username
+		Username:        flowSession.Get("temp_username").(string), // Use temporary username
 	}
 	if err := s.repository.SaveAuthCode(ctx, authCodeRecord); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save auth code"})
@@ -60,7 +60,7 @@ func (s *LoginService) ContinueLogin(ctx *gin.Context) (*dtos.LoginResponse, err
 	}
 
 	//save session
-	
+
 	sessionID := uuid.New().String()
 	http.SetCookie(ctx.Writer, &http.Cookie{
 		Name:     "session_id",
@@ -88,11 +88,11 @@ func (s *LoginService) ContinueLogin(ctx *gin.Context) (*dtos.LoginResponse, err
 	}
 
 	// Clear session data
-	flow_session.Set("user_id", userID.(string))
-	flow_session.Delete("temp_user_id")          
-	flow_session.Delete("temp_username")         
-	flow_session.Delete("login_state")           
-	flow_session.Delete("oauth_pending")
+	flowSession.Set("user_id", userID.(string))
+	flowSession.Delete("temp_user_id")
+	flowSession.Delete("temp_username")
+	flowSession.Delete("login_state")
+	flowSession.Delete("oauth_pending")
 	// ctx.JSON(http.StatusOK, LoginResponse)
 	return LoginResponse, nil
 

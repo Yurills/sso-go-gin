@@ -85,7 +85,7 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 	}
 
 	//start the session to store the pending authorization request, for handling interrupt later in login
-	flow_session := sessions.Default(ctx)
+	flowSession := sessions.Default(ctx)
 
 	pending := models.OAuthPending{
 		ClientID:    authClient.ClientID,
@@ -95,8 +95,10 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 	}
 
 	jsonStr, _ := json.Marshal(pending)
-	flow_session.Set("oauth_pending", string(jsonStr)) // Store pending authorization request in session
-	flow_session.Save()
+	flowSession.Set("oauth_pending", string(jsonStr)) // Store pending authorization request in session
+	if err := flowSession.Save(); err != nil {
+		return nil, errors.New("failed to save session")
+	}
 
 	return authorizeResponse, nil
 

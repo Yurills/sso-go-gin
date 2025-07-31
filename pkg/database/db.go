@@ -5,7 +5,6 @@ import (
 	"sso-go-gin/config"
 	"sso-go-gin/internal/sso/models"
 
-	
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -24,7 +23,7 @@ func NewDB(config *config.Config) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.AutoMigrate(
+	if err := db.AutoMigrate(
 		models.AuthClient{},
 		models.AuthCode{},
 		models.AuthRequestCode{},
@@ -33,7 +32,9 @@ func NewDB(config *config.Config) (*gorm.DB, error) {
 		models.SSOToken{},
 		models.SSORequestURI{},
 		models.RefreshToken{},
-	)
+	); err != nil {
+		return nil, fmt.Errorf("failed to auto-migrate database: %w", err)
+	}
 
 	return db, nil
 
@@ -44,4 +45,3 @@ func NewDB(config *config.Config) (*gorm.DB, error) {
 // 		Addr: fmt.Sprintf("%s:%s", config.RedisHost, config.RedisPort),
 // 	})
 // }
-

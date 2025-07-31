@@ -58,6 +58,7 @@ func newRouter(
 	r.Use(policy.AddSecurityPolicyMiddleware())
 	r.Use(policy.AddVaryOriginMiddleware())
 	r.Use(policy.AddSecurityHeadersMiddleware())
+	r.Use(policy.RejectSuspiciousEndpointsMiddleware())
 
 	r.Use(cors.New((cors.Config{
 		AllowOrigins:     []string{"http://localhost:8081", "http://localhost:8082"},
