@@ -48,14 +48,8 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 	}
 
 	//check csrf token
-	csrfCookie, err := ctx.Request.Cookie("csrf_token")
-	if err != nil {
-		return nil, errors.New("missing CSRF token")
-	}
-
-	csrfHeader := ctx.GetHeader("X-csrf_token")
-	if csrfHeader != csrfCookie.Value {
-		return nil, errors.New("invalid CSRF token")
+	if err := validateCSRF(ctx); err != nil {
+		return nil, err
 	}
 
 	flowSession.Set("temp_user_id", user.ID.String()) // Temporarily store user ID in session
@@ -68,6 +62,8 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 			return nil, errors.New("failed to save session")
 		}
 		print("session state set:" + flowSession.Get("login_state").(string))
+
+		//handler check if this specific error message is returned. watch out for this if error message is changed
 		return nil, errors.New("2FA required")
 	}
 
@@ -131,4 +127,18 @@ func (s *LoginService) Login(ctx *gin.Context, req dtos.LoginRequest) (*dtos.Log
 
 	return loginResponse, nil
 
+}
+
+func validateCSRF(ctx *gin.Context) error {
+	csrfCookie, err := ctx.Request.Cookie("csrf_token")
+	if err != nil {
+		return errors.New("missing CSRF token")
+	}
+
+	csrfHeader := ctx.GetHeader("X-csrf_token")
+	if csrfHeader != csrfCookie.Value {
+		return errors.New("invalid CSRF token")
+	}
+
+	return nil
 }

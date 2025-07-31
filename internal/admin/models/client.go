@@ -1,8 +1,9 @@
 package models
+
 import (
 	"encoding/json"
-	"time"
 	"github.com/google/uuid"
+	"time"
 )
 
 type AuthClient struct {

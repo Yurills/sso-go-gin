@@ -30,18 +30,18 @@ func (h *LoginHandler) PostLogin(c *gin.Context) {
 	if err != nil {
 		if err.Error() == "2FA required" {
 			// Redirect to 2FA page if 2FA is required
-			c.JSON(302, gin.H{"redirect_uri": "/2fa"})
+			c.JSON(http.StatusFound, gin.H{"redirect_uri": "/2fa"})
 			return
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 	}
-	callback_uri := res.RedirectURI
+	callbackURI := res.RedirectURI
 	c.JSON(http.StatusOK, gin.H{
 		"code":         res.AuthCode,
 		"state":        res.State,
 		"nonce":        res.Nonce,
-		"redirect_uri": callback_uri})
+		"redirect_uri": callbackURI})
 
 }

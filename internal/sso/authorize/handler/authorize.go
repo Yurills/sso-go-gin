@@ -13,8 +13,8 @@ type AuthorizeHandler struct {
 	AuthorizeService *service.AuthorizeService
 }
 
-func NewAuthorizeHandler(AuthorizeService *service.AuthorizeService) *AuthorizeHandler {
-	return &AuthorizeHandler{AuthorizeService}
+func NewAuthorizeHandler(authorizeService *service.AuthorizeService) *AuthorizeHandler {
+	return &AuthorizeHandler{authorizeService}
 }
 
 func (h *AuthorizeHandler) GetAuthorize(c *gin.Context) {
@@ -37,8 +37,8 @@ func (h *AuthorizeHandler) GetAuthorize(c *gin.Context) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
-			LoginURL := fmt.Sprintf("/login?rid=%s&client_id=%s", res.RID, req.ClientID)
-			c.Redirect(http.StatusFound, LoginURL)
+			loginURL := fmt.Sprintf("/login?rid=%s&client_id=%s", res.RID, req.ClientID)
+			c.Redirect(http.StatusFound, loginURL)
 			return
 		}
 	}
@@ -52,9 +52,6 @@ func (h *AuthorizeHandler) GetAuthorize(c *gin.Context) {
 	if res.Nonce != nil && *res.Nonce != "" {
 		callbackurl += "&nonce=" + *res.Nonce
 	}
-
-	
-
 
 	c.Redirect(http.StatusFound, callbackurl)
 

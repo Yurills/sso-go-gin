@@ -10,8 +10,8 @@ type Handler struct {
 	Service *Service
 }
 
-func NewHandler(Service *Service) *Handler {
-	return &Handler{Service}
+func NewHandler(service *Service) *Handler {
+	return &Handler{service}
 }
 
 func (h *Handler) PostLogin(c *gin.Context) {

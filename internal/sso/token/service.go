@@ -2,7 +2,6 @@ package token
 
 import (
 	"errors"
-	"log"
 	"sso-go-gin/internal/sso/models"
 	"sso-go-gin/pkg/utils/hashutil"
 	"sso-go-gin/pkg/utils/randomutil"
@@ -21,10 +20,11 @@ func NewTokenService(repository *TokenRepository) *TokenService {
 	return &TokenService{repository}
 }
 
+// grantType: "authorization_code"
 func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*TokenResponse, error) {
-	//verify nonce
+	// verify nonce
 
-	//verify grant type
+	// verify grant type
 
 	if req.GrantType != "authorization_code" && req.GrantType != "refresh_token" {
 		return nil, errors.New("invalid grant type")
@@ -53,22 +53,17 @@ func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*Token
 	}
 
 	//verify client id
-	auth_request, err := s.repository.GetAuthRequestByID(ctx, code.RID.String())
+	authRequest, err := s.repository.GetAuthRequestByID(ctx, code.RID.String())
 	if err != nil {
 		return nil, errors.New("invalid client ID")
 	}
-
-	if auth_request.IsExpired() {
+	if authRequest.IsExpired() {
 		return nil, errors.New("auth request is expired")
 	}
 
 	//verify code challenge
-	hashedCodeVerifier := hashutil.HashedCodeVerifier(req.CodeVerifier)
-	if hashedCodeVerifier != auth_request.CodeChallenge {
-		log.Println(req.CodeVerifier + " does not match the code challenge:" + hashedCodeVerifier + " != " + auth_request.CodeChallenge)
-
-		return nil, errors.New(req.CodeVerifier + " does not match the code challenge:" + hashedCodeVerifier + " != " + auth_request.CodeChallenge)
-
+	if !validateCodeChallenge(req.CodeVerifier, authRequest.CodeChallenge) {
+		return nil, errors.New("code challenge verification failed")
 	}
 
 	//verify user
@@ -78,10 +73,10 @@ func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*Token
 	}
 
 	jwtParams := tokenutil.JWTTokenParams{
-		ID: user.ID.String(),
+		ID:       user.ID.String(),
 		Username: code.Username,
 		Email:    user.Email,
-		Nonce:    auth_request.Nonce,
+		Nonce:    authRequest.Nonce,
 		TTL:      3600, // Set token expiration time (1 hour)
 	}
 
@@ -96,10 +91,10 @@ func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*Token
 
 	// Get destination link from SSO token, client id can have multiple SSO tokens so not really good solution
 	// If the SSO token is not found, destination_link will be an empty string
-	var destination_link string
-	sso_token, _ := s.repository.GetSSOTokenByClientID(ctx, auth_request.ClientID.String())
-	if sso_token != nil {
-		destination_link = sso_token.Destination
+	var destinationLink string
+	ssoToken, _ := s.repository.GetSSOTokenByClientID(ctx, authRequest.ClientID.String())
+	if ssoToken != nil {
+		destinationLink = ssoToken.Destination
 	}
 
 	//generate access token
@@ -109,15 +104,14 @@ func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*Token
 		ExpiresIn:       3600,         // Set token expiration time (1 hour)
 		RefreshToken:    refreshtoken, // Generate a random refresh token
 		Nonce:           req.Nonce,
-		DestinationLink: destination_link,
+		DestinationLink: destinationLink,
 	}
 
 	// Save the SSO token with the access token and refresh token
 	refreshToken := models.RefreshToken{
 		ID: uuid.New(),
-
 		RefreshToken:    refreshtoken,
-		ClientID:        auth_request.ClientID,
+		ClientID:        authRequest.ClientID,
 		User:            user.Username,
 		Email:           user.Email,
 		ExpiredDatetime: time.Now().Add(1 * time.Hour), // Set expiration time for the access token
@@ -131,13 +125,15 @@ func (s *TokenService) GenerateToken(ctx *gin.Context, req TokenRequest) (*Token
 	return response, nil
 }
 
+
+// grantType: "refresh_token"
 func (s *TokenService) RefreshToken(ctx *gin.Context, req TokenRequest) (*TokenResponse, error) {
-	//verify grant type
+	// verify grant type
 	if req.GrantType != "refresh_token" {
 		return nil, errors.New("invalid grant type")
 	}
 
-	//verify refresh token
+	// verify refresh token
 	refreshToken, err := s.repository.GetRefreshToken(ctx, req.Code)
 	if err != nil {
 		return nil, errors.New("invalid refresh token")
@@ -180,4 +176,9 @@ func (s *TokenService) RefreshToken(ctx *gin.Context, req TokenRequest) (*TokenR
 	}
 
 	return response, nil
+}
+
+func validateCodeChallenge(codeVerifier string, codeChallenge string) bool {
+	hashedCodeVerifier := hashutil.HashedCodeVerifier(codeVerifier)
+	return hashedCodeVerifier == codeChallenge
 }

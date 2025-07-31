@@ -61,7 +61,7 @@ func (s *PARService) GetRequestToken(c *gin.Context, req *dtos.PARRequestTokenRe
 		return nil, errors.New("failed to get auth client by name: " + err.Error())
 	}
 
-	sso_token := &models.SSOToken{
+	ssoToken := &models.SSOToken{
 		ID:              uuid.New(),
 		Token:           token, // Generate a random token
 		ClientID:        (authClient.ID),
@@ -71,7 +71,7 @@ func (s *PARService) GetRequestToken(c *gin.Context, req *dtos.PARRequestTokenRe
 		User:            username,
 	}
 
-	if err := s.repository.SaveSSOToken(c, sso_token); err != nil {
+	if err := s.repository.SaveSSOToken(c, ssoToken); err != nil {
 		return nil, errors.New("failed to save SSO token: " + err.Error())
 	}
 	response := &dtos.PARRequestTokenResponse{

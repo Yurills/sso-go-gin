@@ -24,7 +24,7 @@ func NewAuthorizeService(repo *repository.AuthorizeRepository) *AuthorizeService
 
 func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest) (*dtos.AuthorizeResponse, error) {
 
-	//verify required parameter
+	// verify required parameter
 	if req.CodeChallenge == "" || req.State == "" || req.ResponseType != "code" || req.CodeChallengeMethod != "S256" {
 		return nil, errors.New("invalid request parameter")
 	}
@@ -37,12 +37,12 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 	if !authClient.Active {
 		return nil, errors.New("client not active")
 	}
-	//verify redirect uri
+	// verify redirect uri
 	if req.RedirectURI != authClient.AuthRedirectCallbackURI {
 		return nil, errors.New("invalid redirect URI")
 	}
 
-	//generate csrf_token
+	// generate csrf_token
 	csrfToken, err := randomutil.GenerateRandomString(64)
 	if err != nil {
 		return nil, errors.New("failed to generate CSRF token")
@@ -84,7 +84,7 @@ func (s *AuthorizeService) Authorize(ctx *gin.Context, req dtos.AuthorizeRequest
 		CRSFSes: csrfToken,
 	}
 
-	//start the session to store the pending authorization request, for handling interrupt later in login
+	// start the session to store the pending authorization request, for handling interrupt later in login
 	flowSession := sessions.Default(ctx)
 
 	pending := models.OAuthPending{
@@ -113,7 +113,7 @@ func (s *AuthorizeService) GenerateAuthCode(ctx *gin.Context, sessionID string, 
 	if !authClient.Active {
 		return nil, errors.New("client not active")
 	}
-	//verify redirect uri
+	// verify redirect uri
 	if req.RedirectURI != authClient.AuthRedirectCallbackURI {
 		return nil, errors.New("invalid redirect URI")
 	}

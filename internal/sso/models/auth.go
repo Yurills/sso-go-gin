@@ -16,4 +16,3 @@ type Session struct {
 func (s *Session) IsExpired() bool {
 	return time.Now().After(s.ExpiredDatetime)
 }
-

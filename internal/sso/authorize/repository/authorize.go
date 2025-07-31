@@ -5,12 +5,12 @@ import (
 	"sso-go-gin/internal/sso/models"
 
 	"github.com/google/uuid"
-	
+
 	"gorm.io/gorm"
 )
 
 type AuthorizeRepository struct {
-	db    *gorm.DB
+	db *gorm.DB
 }
 
 func NewAuthorizeRepository(db *gorm.DB) *AuthorizeRepository {
@@ -48,11 +48,11 @@ func (r *AuthorizeRepository) SaveRequestCode(c context.Context, code *models.Au
 
 func (r *AuthorizeRepository) GetSessionByID(c context.Context, sessionID string) (*models.Session, error) {
 	var session models.Session
-	session_id, err := uuid.Parse(sessionID)
+	parsedSessionID, err := uuid.Parse(sessionID)
 	if err != nil {
 		return nil, err
 	}
-	if err := r.db.WithContext(c).First(&session, "id = ?", session_id).Error; err != nil {
+	if err := r.db.WithContext(c).First(&session, "id = ?", parsedSessionID).Error; err != nil {
 		return nil, err
 	}
 	return &session, nil
@@ -60,15 +60,15 @@ func (r *AuthorizeRepository) GetSessionByID(c context.Context, sessionID string
 
 func (r *AuthorizeRepository) GetUserInfoBySessionID(c context.Context, sessionID string) (*models.User, error) {
 	var user models.User
-	//join session and user_info table
-	session_id, err := uuid.Parse(sessionID)
+	// join session and user_info table
+	parsedSessionID, err := uuid.Parse(sessionID)
 	if err != nil {
 		return nil, err
 	}
 
 	if err := r.db.WithContext(c).Table("user_info").Select("user_info.*").
 		Joins("JOIN sessions ON user_info.id = sessions.user_id").
-		Where("sessions.id = ?", session_id).First(&user).Error; err != nil {
+		Where("sessions.id = ?", parsedSessionID).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

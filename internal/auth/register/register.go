@@ -20,7 +20,7 @@ func NewService(repo *repository) *Service {
 
 func (s *Service) Register(c context.Context, req RegisterRequest) (*models.User, error) {
 
-	//check if the username already exists
+	// check if the username already exists
 	existingUser, err := s.repository.GetUserInfo(c, req.Username)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
@@ -37,11 +37,11 @@ func (s *Service) Register(c context.Context, req RegisterRequest) (*models.User
 
 	// Create a new user model
 	user := &models.User{
-		ID:       uuid.New(), // Assuming GenerateUUID generates a new UUID
-		Username: req.Username,
-		Password: hashedPassword,
-		Email:    req.Email,
-		TwoFAEnabled: false, // Default value
+		ID:                 uuid.New(), // Assuming GenerateUUID generates a new UUID
+		Username:           req.Username,
+		Password:           hashedPassword,
+		Email:              req.Email,
+		TwoFAEnabled:       false, // Default value
 		ForceResetPassword: false, // Default value
 
 	}

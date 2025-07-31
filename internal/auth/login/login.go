@@ -9,7 +9,7 @@ import (
 
 type Service struct {
 	repository *repository
-	//create token maker
+	// create token maker
 }
 
 func NewService(repo *repository) *Service {
@@ -18,7 +18,7 @@ func NewService(repo *repository) *Service {
 
 func (s *Service) Login(c context.Context, req LoginRequest) (*models.User, error) {
 
-	//check if user matches
+	// check if user matches
 	user, err := s.repository.GetUserInfo(c, req.Username)
 	if err != nil {
 		return nil, errors.New("invalid credentials")

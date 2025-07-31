@@ -1,6 +1,10 @@
 package token
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 type TokenHandler struct {
 	TokenService *TokenService
@@ -17,17 +21,17 @@ func (h *TokenHandler) PostToken(c *gin.Context) {
 
 	// Verify JSON binding
 	if err := c.ShouldBind(&req); err != nil {
-		c.JSON(400, gin.H{"error": "Invalid request format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 		return
 	}
 
 	// Call service to handle token generation
 	response, err := h.TokenService.GenerateToken(c, req)
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"access_token":     response.AccessToken,
 		"refresh_token":    response.RefreshToken,
 		"expires_in":       response.ExpiresIn,
