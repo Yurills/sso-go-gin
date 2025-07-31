@@ -170,8 +170,18 @@ export const LoginForm = ({ clientApp, redirectUri, state, scope, responseType }
         className="w-full h-12 bg-primary hover:bg-primary/90 transition-colors"
         disabled={isLoading}
       >
-        {isLoading ? "Authenticating..." : clientApp ? `Authorize ${clientApp}` : "Sign In"}
+        {getButtonText(isLoading, clientApp)}
       </Button>
     </form>
   );
 };
+
+const getButtonText = (isLoading, clientApp) => {
+  if (isLoading) {
+    return "Authenticating...";
+  }
+  if (clientApp) {
+    return `Authorize ${clientApp}`;
+  }
+  return "Sign In";
+}

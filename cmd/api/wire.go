@@ -9,6 +9,7 @@ import (
 	"sso-go-gin/config"
 	"sso-go-gin/internal/admin"
 	"sso-go-gin/internal/middleware"
+	"sso-go-gin/internal/middleware/policy"
 	"sso-go-gin/internal/sso"
 	authorizeHandler "sso-go-gin/internal/sso/authorize/handler"
 	loginHandler "sso-go-gin/internal/sso/login/handler"
@@ -46,6 +47,11 @@ func newRouter(
 	adminHandler *admin.AdminHandlers,
 	middleware *middleware.Middlewares) *gin.Engine {
 	r := gin.Default()
+
+	//Content Policy Middleware
+	r.Use(policy.AddSecurityPolicyMiddleware())
+	r.Use(policy.AddVaryOriginMiddleware())
+	r.Use(policy.AddSecurityHeadersMiddleware())
 
 	r.Use(cors.New((cors.Config{
 		AllowOrigins:     []string{"http://localhost:8081", "http://localhost:8082"}, // Replace with your frontend URL

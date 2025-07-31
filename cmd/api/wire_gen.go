@@ -17,6 +17,7 @@ import (
 	"sso-go-gin/internal/admin"
 	handler4 "sso-go-gin/internal/admin/register_client/handler"
 	"sso-go-gin/internal/middleware"
+	"sso-go-gin/internal/middleware/policy"
 	"sso-go-gin/internal/sso"
 	handler2 "sso-go-gin/internal/sso/authorize/handler"
 	"sso-go-gin/internal/sso/login/handler"
@@ -53,6 +54,10 @@ func newRouter(
 	h *sso.SSOHandlers,
 	adminHandler *admin.AdminHandlers, middleware2 *middleware.Middlewares) *gin.Engine {
 	r := gin.Default()
+
+	r.Use(policy.AddSecurityPolicyMiddleware())
+	r.Use(policy.AddVaryOriginMiddleware())
+	r.Use(policy.AddSecurityHeadersMiddleware())
 
 	r.Use(cors.New((cors.Config{
 		AllowOrigins:     []string{"http://localhost:8081", "http://localhost:8082"},
