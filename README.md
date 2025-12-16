@@ -1,8 +1,6 @@
 # SSO Go Gin
 
 ![Go Version](https://img.shields.io/github/go-mod/go-version/Yurills/sso-go-gin)
-![License](https://img.shields.io/github/license/Yurills/sso-go-gin)
-![Build Status](https://img.shields.io/github/actions/workflow/status/Yurills/sso-go-gin/go.yml?branch=main)
 
 A robust Single Sign-On (SSO) authentication service built with **Go** and the **Gin Web Framework**. This project includes a backend API for managing user identities and sessions, coupled with a **TypeScript** frontend for user interaction.
 
@@ -125,8 +123,3 @@ Below are the core endpoints provided by the service (example):
 | `POST` | `/auth/logout` | Invalidate session (if applicable) |
 | `GET` | `/auth/me` | Get current user profile (Protected) |
 | `POST` | `/auth/refresh` | Refresh access token |
-
-*Note: Check `cmd/api/routes.go` or the swagger documentation (if enabled) for the full list of routes.*
-## 📝 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
