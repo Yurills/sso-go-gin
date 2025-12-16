@@ -1,8 +1,6 @@
 # SSO Go Gin
 
 ![Go Version](https://img.shields.io/github/go-mod/go-version/Yurills/sso-go-gin)
-![License](https://img.shields.io/github/license/Yurills/sso-go-gin)
-![Build Status](https://img.shields.io/github/actions/workflow/status/Yurills/sso-go-gin/go.yml?branch=main)
 
 A robust Single Sign-On (SSO) authentication service built with **Go** and the **Gin Web Framework**. This project includes a backend API for managing user identities and sessions, coupled with a **TypeScript** frontend for user interaction.
 
